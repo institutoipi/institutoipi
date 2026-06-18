@@ -48,5 +48,5 @@ export default async function PostPage({ params }: Props) {
   const post = docs[0]
   if (!post) notFound()
 
-  return <PostView post={post} />
+  return <PostView post={post as unknown as import('@/components/blog/PostView').PostData} />
 }
