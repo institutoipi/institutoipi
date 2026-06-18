@@ -61,6 +61,10 @@
     "node": "^18.20.2 || >=20.9.0",
     "pnpm": "^9 || ^10"
   },
+  "overrides": {
+    "postcss": "^8.5.15",
+    "esbuild": "0.27.2"
+  },
   "pnpm": {
     "onlyBuiltDependencies": [
       "sharp",
