@@ -14,6 +14,14 @@ function ownNonPublished(userId: number): Where {
 
 export const Posts: CollectionConfig = {
   slug: 'posts',
+  // Drafts + autosave: cria o rascunho ao começar a editar, liberando o preview
+  // já na criação. O `status` custom segue como fonte de verdade (ver beforeChange
+  // que sincroniza o `_status` nativo a partir dele).
+  versions: {
+    drafts: {
+      autosave: { interval: 800 },
+    },
+  },
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'status', 'category', 'publishedAt'],
@@ -108,6 +116,9 @@ export const Posts: CollectionConfig = {
       type: 'select',
       required: true,
       defaultValue: 'draft',
+      // enumName próprio para não colidir com o `_status` nativo dos drafts
+      // (ambos derivariam `enum_posts_status` e o `review` seria perdido).
+      enumName: 'enum_posts_editorial_status',
       options: [
         { label: 'Rascunho', value: 'draft' },
         { label: 'Em revisão', value: 'review' },
@@ -161,6 +172,10 @@ export const Posts: CollectionConfig = {
         if (data.status === 'published' && !data.publishedAt) {
           data.publishedAt = new Date().toISOString()
         }
+
+        // O `status` custom é a fonte de verdade; espelha no `_status` nativo
+        // (usado pelos drafts/autosave) para alinhar visibilidade e preview.
+        data._status = data.status === 'published' ? 'published' : 'draft'
 
         return data
       },
