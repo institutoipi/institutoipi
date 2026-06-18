@@ -1,4 +1,6 @@
 import type { CollectionConfig } from 'payload'
+import crypto from 'crypto'
+import path from 'path'
 
 export const Media: CollectionConfig = {
   slug: 'media',
@@ -13,6 +15,19 @@ export const Media: CollectionConfig = {
       const role = (user as { role?: string } | null)?.role
       return role === 'admin' || role === 'editor'
     },
+  },
+  hooks: {
+    // Armazena o arquivo com um hash do conteúdo em vez do nome original
+    // (evita espaços/acentos na URL e não vaza o nome do arquivo enviado).
+    beforeOperation: [
+      ({ req, operation }) => {
+        if ((operation === 'create' || operation === 'update') && req.file) {
+          const ext = path.extname(req.file.name).toLowerCase()
+          const hash = crypto.createHash('sha256').update(req.file.data).digest('hex').slice(0, 32)
+          req.file.name = `${hash}${ext}`
+        }
+      },
+    ],
   },
   fields: [
     {
