@@ -23,7 +23,7 @@ export function SlugField({ path }: { path: string }) {
     <TextInput
       path={path}
       value={slug ?? ''}
-      onChange={(e) => {
+      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
         if (!isPublished) setValue(e.target.value)
       }}
       readOnly={isPublished}
