@@ -25,8 +25,11 @@ export const Posts: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'status', 'category', 'publishedAt'],
-    // Botão "Abrir" — abre o post publicado em nova aba
+    // Botão "Preview" — abre o post publicado em nova aba. Só faz sentido quando
+    // publicado (a página pública dá 404 em rascunho); retornar null esconde o botão.
+    // Para rascunhos use o "Open in new window" do live preview (/blog/preview/...).
     preview: (doc) => {
+      if (doc._status !== 'published') return null
       const base = process.env.PAYLOAD_PUBLIC_URL || 'http://localhost:3000'
       return `${base}/blog/${doc.slug}`
     },

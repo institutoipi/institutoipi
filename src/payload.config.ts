@@ -44,6 +44,7 @@ export default buildConfig({
         Icon: '/components/admin/Icon#AdminIcon',
         Logo: '/components/admin/Logo#AdminLogo',
       },
+      providers: ['/components/admin/PreviewToolbarStyles#PreviewToolbarStyles'],
     },
   },
   cors: siteOrigins,
