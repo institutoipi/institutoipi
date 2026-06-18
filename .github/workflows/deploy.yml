@@ -1,0 +1,22 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    uses: wizortech/deploy-workflows/.github/workflows/docker-deploy.yml@main
+    with:
+      app_name: institutoipi
+      image: institutoipi/app
+      target_host: 147.15.14.213
+      service: app
+      runner: self-hosted
+      infisical_project_id: 6944c962-3aba-4f22-85ef-e81bf71c17a9
+    secrets: inherit
