@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const { docs } = await payload.find({
     collection: 'posts',
-    where: { slug: { equals: slug }, status: { equals: 'published' } },
+    where: { slug: { equals: slug }, _status: { equals: 'published' } },
     limit: 1,
     depth: 1,
   })
@@ -40,7 +40,7 @@ export default async function PostPage({ params }: Props) {
 
   const { docs } = await payload.find({
     collection: 'posts',
-    where: { slug: { equals: slug }, status: { equals: 'published' } },
+    where: { slug: { equals: slug }, _status: { equals: 'published' } },
     limit: 1,
     depth: 2,
   })

@@ -9,7 +9,7 @@ function isAdminOrEditor(user: UserWithRole): boolean {
 }
 
 function ownNonPublished(userId: number): Where {
-  return { and: [{ author: { equals: userId } }, { status: { not_in: ['published'] } }] }
+  return { and: [{ author: { equals: userId } }, { _status: { not_equals: 'published' } }] }
 }
 
 export const Posts: CollectionConfig = {
@@ -41,7 +41,7 @@ export const Posts: CollectionConfig = {
   access: {
     read: ({ req: { user } }) => {
       if (user) return true
-      return { status: { equals: 'published' } } satisfies Where
+      return { _status: { equals: 'published' } } satisfies Where
     },
     create: ({ req: { user } }) => Boolean(user),
     update: ({ req: { user } }) => {
@@ -165,28 +165,32 @@ export const Posts: CollectionConfig = {
           data.author = user.id
         }
 
-        if (user && !isAdminOrEditor(user) && data.status === 'published') {
+        // Publicado se QUALQUER um dos dois disser: o botão nativo "Publish"
+        // (_status) ou o campo editorial `status`. Mantém os dois sincronizados
+        // para que a visibilidade no site nunca divirja do que o admin mostra.
+        const isPublished = data._status === 'published' || data.status === 'published'
+
+        if (isPublished && user && !isAdminOrEditor(user)) {
           throw new Error('Autores não podem publicar posts. Envie para revisão.')
         }
 
-        if (data.status === 'published' && !data.publishedAt) {
+        if (isPublished && !data.publishedAt) {
           data.publishedAt = new Date().toISOString()
         }
 
-        // O `status` custom é a fonte de verdade; espelha no `_status` nativo
-        // (usado pelos drafts/autosave) para alinhar visibilidade e preview.
-        data._status = data.status === 'published' ? 'published' : 'draft'
+        data._status = isPublished ? 'published' : 'draft'
+        data.status = isPublished ? 'published' : data.status === 'review' ? 'review' : 'draft'
 
         return data
       },
     ],
     afterChange: [
       ({ doc, previousDoc, req }) => {
-        const wasPublished = previousDoc?.status === 'published'
-        const isPublished = doc?.status === 'published'
+        const wasPublished = previousDoc?._status === 'published'
+        const isPublished = doc?._status === 'published'
         if (wasPublished || isPublished) {
           revalidateBlog(
-            `post:${doc.slug} (${previousDoc?.status ?? 'novo'} → ${doc.status})`,
+            `post:${doc.slug} (${previousDoc?._status ?? 'novo'} → ${doc._status})`,
             doc.slug,
             req.payload,
           )
@@ -196,7 +200,7 @@ export const Posts: CollectionConfig = {
     ],
     afterDelete: [
       ({ doc, req }) => {
-        if (doc?.status === 'published') {
+        if (doc?._status === 'published') {
           revalidateBlog(`post deletado:${doc.slug}`, doc.slug, req.payload)
         }
         return doc

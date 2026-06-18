@@ -16,7 +16,7 @@ export default async function BlogPage() {
 
   const { docs: posts } = await payload.find({
     collection: 'posts',
-    where: { status: { equals: 'published' } },
+    where: { _status: { equals: 'published' } },
     sort: '-publishedAt',
     depth: 2,
     limit: 50,
