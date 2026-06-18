@@ -12,10 +12,11 @@ export async function submitContact(
   _prev: ContactState,
   formData: FormData,
 ): Promise<ContactState> {
-  const name = (formData.get('name') as string)?.trim()
-  const email = (formData.get('email') as string)?.trim()
-  const phone = (formData.get('phone') as string)?.trim() || undefined
-  const message = (formData.get('message') as string)?.trim()
+  const getString = (key: string) => { const v = formData.get(key); return typeof v === 'string' ? v.trim() : '' }
+  const name = getString('name')
+  const email = getString('email')
+  const phone = getString('phone') || undefined
+  const message = getString('message')
 
   if (!name || !email || !message) {
     return { status: 'error', message: 'Preencha todos os campos obrigatórios.' }

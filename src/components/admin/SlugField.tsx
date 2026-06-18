@@ -7,8 +7,8 @@ import { slugify } from '@/lib/slugify'
 export function SlugField({ path }: { path: string }) {
   const { value: slug, setValue } = useField<string>({ path })
 
-  const title = useFormFields(([fields]) => fields['title']?.value as string | undefined)
-  const status = useFormFields(([fields]) => fields['status']?.value as string | undefined)
+  const title = useFormFields(([fields]) => { const v = fields['title']?.value; return typeof v === 'string' ? v : undefined })
+  const status = useFormFields(([fields]) => { const v = fields['status']?.value; return typeof v === 'string' ? v : undefined })
 
   const isPublished = status === 'published'
 

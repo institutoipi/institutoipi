@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import React from 'react'
-import type { Post, Media, Category, User } from '@/payload-types'
+import type { Post } from '@/payload-types'
 import { RichText } from './RichText'
 
 type Props = {
@@ -9,11 +9,9 @@ type Props = {
 }
 
 export function PostView({ post, isPreview }: Props) {
-  const cover = post.cover && typeof post.cover === 'object' ? (post.cover as Media) : null
-  const category =
-    post.category && typeof post.category === 'object' ? (post.category as Category) : null
-  const author =
-    post.author && typeof post.author === 'object' ? (post.author as User) : null
+  const cover = post.cover && typeof post.cover === 'object' ? post.cover : null
+  const category = post.category && typeof post.category === 'object' ? post.category : null
+  const author = post.author && typeof post.author === 'object' ? post.author : null
   const date = post.publishedAt
     ? new Date(post.publishedAt).toLocaleDateString('pt-BR', {
         day: '2-digit',
@@ -46,7 +44,7 @@ export function PostView({ post, isPreview }: Props) {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={cover.url}
-              alt={cover.alt || post.title || ''}
+              alt={cover.alt || post.title}
               className="h-full w-full object-cover"
             />
           </div>
