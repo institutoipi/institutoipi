@@ -1,35 +1,19 @@
 import Link from 'next/link'
 import React from 'react'
+import type { Post, Media, Category, User } from '@/payload-types'
 import { RichText } from './RichText'
 
-type MediaObj = { url?: string | null; alt?: string; width?: number | null; height?: number | null }
-type CategoryObj = { name?: string }
-type AuthorObj = { name?: string }
-
-export type PostData = {
-  title?: string | null
-  slug?: string | null
-  excerpt?: string | null
-  content?: unknown
-  cover?: string | MediaObj | null
-  category?: string | CategoryObj | null
-  author?: string | AuthorObj | null
-  publishedAt?: string | null
-  seoTitle?: string | null
-  seoDescription?: string | null
-}
-
 type Props = {
-  post: PostData
+  post: Post
   isPreview?: boolean
 }
 
 export function PostView({ post, isPreview }: Props) {
-  const cover = post.cover && typeof post.cover === 'object' ? (post.cover as MediaObj) : null
+  const cover = post.cover && typeof post.cover === 'object' ? (post.cover as Media) : null
   const category =
-    post.category && typeof post.category === 'object' ? (post.category as CategoryObj) : null
+    post.category && typeof post.category === 'object' ? (post.category as Category) : null
   const author =
-    post.author && typeof post.author === 'object' ? (post.author as AuthorObj) : null
+    post.author && typeof post.author === 'object' ? (post.author as User) : null
   const date = post.publishedAt
     ? new Date(post.publishedAt).toLocaleDateString('pt-BR', {
         day: '2-digit',

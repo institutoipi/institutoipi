@@ -1,12 +1,13 @@
 'use client'
 
 import { useLivePreview } from '@payloadcms/live-preview-react'
-import { PostView, type PostData } from '@/components/blog/PostView'
+import type { Post } from '@/payload-types'
+import { PostView } from '@/components/blog/PostView'
 
 const serverURL = process.env.NEXT_PUBLIC_PAYLOAD_URL || 'http://localhost:3000'
 
-export function LivePreviewClient({ initialData }: { initialData: PostData }) {
-  const { data } = useLivePreview<PostData>({
+export function LivePreviewClient({ initialData }: { initialData: Post }) {
+  const { data } = useLivePreview<Post>({
     initialData,
     serverURL,
     depth: 2,
