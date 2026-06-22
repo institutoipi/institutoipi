@@ -1,0 +1,50 @@
+# Monolito Next.js + Payload (porta 3000). Usa DATABASE_URL (não URI). replicas=1
+# evita corrida de migration no boot. DATABASE_URL vem do secret do CNPG; resto do
+# Secret institutoipi-env (SOPS). MinIO aponta pro s3-1 (david).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: institutoipi
+  namespace: institutoipi
+  labels:
+    app: institutoipi
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: institutoipi
+  template:
+    metadata:
+      labels:
+        app: institutoipi
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: institutoipi
+          image: registry.luanfernandes.dev/institutoipi/app:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: ipi-db-app
+                  key: uri
+          envFrom:
+            - secretRef:
+                name: institutoipi-env
+          readinessProbe:
+            tcpSocket: { port: 3000 }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket: { port: 3000 }
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          resources:
+            requests: { cpu: 50m, memory: 256Mi }
+            limits: { memory: 512Mi }

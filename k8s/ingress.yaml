@@ -1,0 +1,27 @@
+# Domínio apex institutoipi.org (zona SUA) → external-dns cria o A record (target heimy)
+# e o TLS é DNS-01. Cutover: hoje o apex aponta pro david; ao remover o A manual, o
+# external-dns assume e aponta pra heimy.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: institutoipi
+  namespace: institutoipi
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    external-dns.alpha.kubernetes.io/target: "137.131.224.86"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts: ["institutoipi.org"]
+      secretName: institutoipi-tls
+  rules:
+    - host: institutoipi.org
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: institutoipi
+                port:
+                  number: 80
