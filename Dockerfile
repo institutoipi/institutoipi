@@ -9,13 +9,16 @@ FROM node:22-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app ./
 COPY . .
-ARG PAYLOAD_SECRET
-ARG DATABASE_URL
-ENV PAYLOAD_SECRET=$PAYLOAD_SECRET \
-    DATABASE_URL=$DATABASE_URL \
-    NEXT_TELEMETRY_DISABLED=1 \
+ENV NEXT_TELEMETRY_DISABLED=1 \
     NODE_OPTIONS=--no-deprecation
-RUN --mount=type=cache,target=/app/.next/cache npm run build
+# Segredos reais NÃO entram na imagem — em runtime vêm do k8s (envFrom do Secret SOPS
+# institutoipi-env e DATABASE_URL do secret do CNPG). O build só precisa de um
+# PAYLOAD_SECRET não-vazio para instanciar a config; usamos placeholders efêmeros,
+# válidos apenas dentro do processo deste RUN (não são gravados em camadas).
+RUN --mount=type=cache,target=/app/.next/cache \
+    PAYLOAD_SECRET="build-time-placeholder" \
+    DATABASE_URL="postgres://build:build@127.0.0.1:5432/build" \
+    npm run build
 
 FROM node:22-alpine AS runner
 WORKDIR /app
