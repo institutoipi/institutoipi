@@ -142,6 +142,7 @@ export function SiteFooter() {
         <div className="mt-14 flex flex-col items-start justify-between gap-4 border-t border-line pt-8 sm:flex-row sm:items-center">
           <p className="text-xs tracking-wide text-soft">
             © {new Date().getFullYear()} IPI · Instituto de Políticas Internacionais
+            <span className="mt-1 block">CNPJ 66.582.635/0001-52</span>
           </p>
           <span className="font-mono text-xs text-soft">
             Educação política, diplomática e cidadã.
