@@ -11,6 +11,7 @@ import { Categories } from './collections/Categories'
 import { Leads } from './collections/Leads'
 import { Media } from './collections/Media'
 import { Posts } from './collections/Posts'
+import { Subjects } from './collections/Subjects'
 import { Users } from './collections/Users'
 import { migrations } from './migrations'
 
@@ -45,11 +46,14 @@ export default buildConfig({
         Logo: '/components/admin/Logo#AdminLogo',
       },
       providers: ['/components/admin/PreviewToolbarStyles#PreviewToolbarStyles'],
+      logout: {
+        Button: '/components/admin/NavFooter#NavFooter',
+      },
     },
   },
   cors: siteOrigins,
   csrf: siteOrigins,
-  collections: [Users, Media, Categories, Posts, Leads],
+  collections: [Users, Media, Categories, Posts, Subjects, Leads],
   editor: lexicalEditor(),
   email: nodemailerAdapter({
     defaultFromAddress: process.env.EMAIL_FROM || 'contato@institutoipi.org',
@@ -79,6 +83,10 @@ export default buildConfig({
     pool: {
       connectionString: process.env.DATABASE_URL || '',
     },
+    // Migrations são a fonte única do schema (dev e prod) — sem drizzle `push`,
+    // que diverge das migrations. Mudou o schema? Gere uma migration:
+    //   npm run migrate:create   →   npm run migrate
+    push: false,
     // Em produção, roda as migrations pendentes automaticamente no boot.
     prodMigrations: migrations,
   }),

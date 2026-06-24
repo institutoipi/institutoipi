@@ -29,8 +29,8 @@ function LexicalNode({ node }: { node: LexicalNode }): React.ReactElement | null
   if (node.type === 'heading') {
     const tag = node.tag || 'h2'
     const children = node.children ? <LexicalNodes nodes={node.children} /> : null
-    if (tag === 'h1') return <h1>{children}</h1>
-    if (tag === 'h2') return <h2>{children}</h2>
+    // O H1 da página já é o título do post (PostView). Um H1 no corpo viraria um
+    // segundo H1 — rebaixamos para H2 (SEO/acessibilidade).
     if (tag === 'h3') return <h3>{children}</h3>
     if (tag === 'h4') return <h4>{children}</h4>
     return <h2>{children}</h2>

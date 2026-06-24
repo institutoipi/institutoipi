@@ -1,18 +1,35 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useState } from 'react'
 import { submitContact, type ContactState } from './actions'
 
 const initial: ContactState = { status: 'idle' }
 
-export function ContactForm() {
+// Máscara de telefone BR: (xx)xxxx-xxxx (fixo) ou (xx)xxxxx-xxxx (celular).
+function formatPhone(value: string): string {
+  const d = value.replace(/\D/g, '').slice(0, 11)
+  if (!d) return ''
+  if (d.length <= 2) return `(${d}`
+  if (d.length <= 6) return `(${d.slice(0, 2)})${d.slice(2)}`
+  if (d.length <= 10) return `(${d.slice(0, 2)})${d.slice(2, 6)}-${d.slice(6)}`
+  return `(${d.slice(0, 2)})${d.slice(2, 7)}-${d.slice(7)}`
+}
+
+const fieldClass =
+  'rounded-lg border border-line bg-surface-2 px-4 py-3 text-sm text-paper placeholder:text-soft/50 focus:border-sol focus:ring-2 focus:ring-sol/30 focus:outline-none'
+const labelClass = 'text-xs font-medium tracking-wider uppercase text-soft'
+
+type Subject = { id: string; name: string }
+
+export function ContactForm({ subjects = [] }: { subjects?: Subject[] }) {
   const [state, action, pending] = useActionState(submitContact, initial)
+  const [phone, setPhone] = useState('')
 
   if (state.status === 'success') {
     return (
-      <div className="rounded-lg border border-white/10 bg-white/5 p-8 text-center">
-        <p className="text-lg font-medium text-white">Mensagem enviada!</p>
-        <p className="mt-2 text-sm text-white/50">
+      <div className="rounded-2xl border border-line bg-surface p-8 text-center">
+        <p className="font-display text-lg font-bold text-paper">Mensagem enviada!</p>
+        <p className="mt-2 text-sm text-soft">
           Enviamos uma confirmação para o seu e-mail. Entraremos em contato em breve.
         </p>
       </div>
@@ -22,14 +39,14 @@ export function ContactForm() {
   return (
     <form action={action} className="flex flex-col gap-5">
       {state.status === 'error' && (
-        <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+        <p className="rounded-lg border border-coral/40 bg-coral/10 px-4 py-3 text-sm text-coral">
           {state.message}
         </p>
       )}
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="name" className="text-xs font-medium tracking-wider uppercase text-white/50">
-          Nome <span className="text-white/30">*</span>
+        <label htmlFor="name" className={labelClass}>
+          Nome <span className="text-sol">*</span>
         </label>
         <input
           id="name"
@@ -37,14 +54,16 @@ export function ContactForm() {
           type="text"
           required
           autoComplete="name"
-          className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/20 focus:border-white/30 focus:outline-none"
-          placeholder="Seu nome completo"
+          pattern="^\s*\S+(\s+\S+)+\s*$"
+          title="Informe nome e sobrenome"
+          className={fieldClass}
+          placeholder="Nome e sobrenome"
         />
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="email" className="text-xs font-medium tracking-wider uppercase text-white/50">
-          E-mail <span className="text-white/30">*</span>
+        <label htmlFor="email" className={labelClass}>
+          E-mail <span className="text-sol">*</span>
         </label>
         <input
           id="email"
@@ -52,35 +71,64 @@ export function ContactForm() {
           type="email"
           required
           autoComplete="email"
-          className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/20 focus:border-white/30 focus:outline-none"
+          className={fieldClass}
           placeholder="seu@email.com"
         />
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="phone" className="text-xs font-medium tracking-wider uppercase text-white/50">
-          Telefone
+        <label htmlFor="phone" className={labelClass}>
+          Telefone <span className="text-sol">*</span>
         </label>
         <input
           id="phone"
           name="phone"
           type="tel"
+          required
+          inputMode="tel"
+          maxLength={15}
+          value={phone}
+          onChange={(e) => setPhone(formatPhone(e.target.value))}
           autoComplete="tel"
-          className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/20 focus:border-white/30 focus:outline-none"
-          placeholder="+55 (00) 00000-0000"
+          className={fieldClass}
+          placeholder="(00)00000-0000"
         />
       </div>
 
+      {subjects.length > 0 && (
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="subject" className={labelClass}>
+            Assunto <span className="text-sol">*</span>
+          </label>
+          <select
+            id="subject"
+            name="subject"
+            required
+            defaultValue=""
+            className={`${fieldClass} cursor-pointer`}
+          >
+            <option value="" disabled>
+              Selecione um assunto
+            </option>
+            {subjects.map((s) => (
+              <option key={s.id} value={s.id} className="bg-surface-2 text-paper">
+                {s.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="message" className="text-xs font-medium tracking-wider uppercase text-white/50">
-          Mensagem <span className="text-white/30">*</span>
+        <label htmlFor="message" className={labelClass}>
+          Mensagem <span className="text-sol">*</span>
         </label>
         <textarea
           id="message"
           name="message"
           required
           rows={5}
-          className="resize-none rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/20 focus:border-white/30 focus:outline-none"
+          className={`${fieldClass} resize-none`}
           placeholder="Como podemos ajudar?"
         />
       </div>
@@ -88,7 +136,7 @@ export function ContactForm() {
       <button
         type="submit"
         disabled={pending}
-        className="mt-2 rounded-lg border border-white/20 bg-white/5 px-6 py-3 text-sm font-medium text-white transition hover:bg-white hover:text-black disabled:cursor-not-allowed disabled:opacity-40"
+        className="mt-2 rounded-full bg-sol px-7 py-3.5 text-sm font-semibold text-ink transition-all hover:brightness-105 focus-visible:ring-2 focus-visible:ring-sol focus-visible:ring-offset-2 focus-visible:ring-offset-ink focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
       >
         {pending ? 'Enviando…' : 'Enviar mensagem'}
       </button>

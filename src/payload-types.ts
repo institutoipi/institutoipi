@@ -71,6 +71,7 @@ export interface Config {
     media: Media;
     categories: Category;
     posts: Post;
+    subjects: Subject;
     leads: Lead;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -83,6 +84,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
+    subjects: SubjectsSelect<false> | SubjectsSelect<true>;
     leads: LeadsSelect<false> | LeadsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -239,6 +241,26 @@ export interface Post {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Assuntos exibidos no select do formulário de contato.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "subjects".
+ */
+export interface Subject {
+  id: number;
+  name: string;
+  /**
+   * Ordem de exibição (menor aparece primeiro).
+   */
+  order?: number | null;
+  /**
+   * Desmarque para ocultar do formulário sem apagar.
+   */
+  active?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Contatos recebidos pelo formulário do site.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -249,6 +271,7 @@ export interface Lead {
   name: string;
   email: string;
   phone?: string | null;
+  subject?: (number | null) | Subject;
   message: string;
   /**
    * Página ou campanha de onde o contato veio.
@@ -296,6 +319,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'posts';
         value: number | Post;
+      } | null)
+    | ({
+        relationTo: 'subjects';
+        value: number | Subject;
       } | null)
     | ({
         relationTo: 'leads';
@@ -419,12 +446,24 @@ export interface PostsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "subjects_select".
+ */
+export interface SubjectsSelect<T extends boolean = true> {
+  name?: T;
+  order?: T;
+  active?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "leads_select".
  */
 export interface LeadsSelect<T extends boolean = true> {
   name?: T;
   email?: T;
   phone?: T;
+  subject?: T;
   message?: T;
   source?: T;
   updatedAt?: T;

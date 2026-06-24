@@ -24,11 +24,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const cover = post.cover && typeof post.cover === 'object' ? post.cover : null
 
   return {
-    title: `${post.seoTitle || post.title} — IPI`,
+    title: post.seoTitle || post.title,
     description: post.seoDescription || post.excerpt || undefined,
+    alternates: { canonical: `/blog/${post.slug}` },
     openGraph: cover?.url
-      ? { images: [{ url: cover.url, width: cover.width ?? undefined, height: cover.height ?? undefined }] }
-      : undefined,
+      ? {
+          type: 'article',
+          images: [{ url: cover.url, width: cover.width ?? undefined, height: cover.height ?? undefined }],
+        }
+      : { type: 'article' },
   }
 }
 

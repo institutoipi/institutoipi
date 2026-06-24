@@ -1,11 +1,15 @@
 import Image from 'next/image'
+import Link from 'next/link'
 import React from 'react'
+import { Globe, Leaf, Landmark, Mountain, Users, Megaphone, type LucideIcon } from 'lucide-react'
+import type { Metadata } from 'next'
 
-const socials = [
-  { href: 'https://www.instagram.com/institutoipi/', label: 'Instagram' },
-  { href: 'https://www.youtube.com/@institutoipi', label: 'YouTube' },
-  { href: 'https://wa.me/5566999186206', label: 'WhatsApp' },
-]
+export const metadata: Metadata = {
+  alternates: { canonical: '/' },
+}
+
+const INSTAGRAM = 'https://www.instagram.com/institutoipi/'
+const YOUTUBE = 'https://www.youtube.com/@institutoipi'
 
 const orgSchema = {
   '@context': 'https://schema.org',
@@ -14,11 +18,129 @@ const orgSchema = {
   url: 'https://institutoipi.org/',
   logo: 'https://institutoipi.org/logo_ipi.png',
   description:
-    'Divulgar a diplomacia e o protagonismo juvenil através de políticas públicas e sociais.',
-  sameAs: [
-    'https://www.instagram.com/institutoipi/',
-    'https://www.youtube.com/@institutoipi',
-  ],
+    'Formação de jovens líderes críticos para ocupar os espaços de decisão: diplomacia, direitos humanos e protagonismo juvenil.',
+  sameAs: [INSTAGRAM, YOUTUBE],
+}
+
+const valores = [
+  'Direitos Humanos',
+  'Protagonismo Juvenil',
+  'Inclusão e Diversidade',
+  'Educação Crítica',
+  'Cooperação Internacional',
+  'Responsabilidade Social',
+  'Ética e Democracia',
+]
+
+const frentes: { sigla: string; nome: string; desc: string; cor: string; Icon: LucideIcon }[] = [
+  {
+    sigla: 'DRI',
+    nome: 'Relações Internacionais',
+    desc: 'Articulação global do Instituto: representação em fóruns, simulações diplomáticas e intercâmbio sobre política externa.',
+    cor: 'sol',
+    Icon: Globe,
+  },
+  {
+    sigla: 'DMA',
+    nome: 'Meio Ambiente',
+    desc: 'Sustentabilidade e emergência climática: educação ambiental, acompanhamento das COPs e justiça climática.',
+    cor: 'mata',
+    Icon: Leaf,
+  },
+  {
+    sigla: 'DPP',
+    nome: 'Políticas Públicas',
+    desc: 'Interface entre conhecimento acadêmico e prática governamental, com foco em juventude, educação e cidadania.',
+    cor: 'coral',
+    Icon: Landmark,
+  },
+  {
+    sigla: 'DPI',
+    nome: 'Políticas Indígenas',
+    desc: 'Valorização, defesa e promoção dos direitos dos povos originários e do protagonismo de jovens lideranças indígenas.',
+    cor: 'coral',
+    Icon: Mountain,
+  },
+  {
+    sigla: 'DRH',
+    nome: 'Recursos Humanos',
+    desc: 'Gestão de talentos e voluntariado: recrutamento, onboarding, formação de lideranças e clima organizacional.',
+    cor: 'sol',
+    Icon: Users,
+  },
+  {
+    sigla: 'DMM',
+    nome: 'Marketing e Mídias',
+    desc: 'A voz e a vitrine do IPI: identidade visual, comunicação e conteúdos que ampliam o alcance e mobilizam a comunidade.',
+    cor: 'mata',
+    Icon: Megaphone,
+  },
+]
+
+const projetos = [
+  {
+    nome: 'Delegações Acadêmicas e Diplomáticas',
+    desc: 'Preparação de delegações juvenis para simulações, conferências e fóruns no Brasil e no exterior.',
+  },
+  {
+    nome: 'Integração da Juventude Latino-Americana',
+    desc: 'Diálogo regional, identidade latino-americana e cooperação acadêmica entre jovens do continente.',
+  },
+  {
+    nome: 'NUPPA — Núcleo de Pesquisa e Produção Acadêmica',
+    desc: 'Centro de produção de conhecimento e fortalecimento do pensamento crítico do Instituto.',
+  },
+  {
+    nome: 'Jovem Político',
+    desc: 'Workshops sobre a baixa participação de jovens na política e caminhos para a participação ativa.',
+  },
+  {
+    nome: 'Línguas do Brasil',
+    desc: 'Salvaguarda e democratização dos idiomas originários, combatendo a invisibilidade das culturas nativas.',
+  },
+  {
+    nome: 'Cooperação Brasil–Angola',
+    desc: 'Embaixada do IPI em Angola como polo de articulação diplomática, científica, social e ambiental.',
+  },
+  {
+    nome: 'Radar Climático',
+    desc: 'Observatório de políticas ambientais e agendas globais, com análises sobre justiça climática e racismo ambiental.',
+  },
+]
+
+const impacto = [
+  'Acesso a oportunidades internacionais',
+  'Democratização da diplomacia juvenil',
+  'Autoestima, autonomia e consciência política',
+  'Redes de jovens líderes pela transformação',
+  'Perspectiva decolonial e diversidade',
+  'Produção de conhecimento com impacto local e global',
+]
+
+const accent: Record<string, { text: string; bg: string; border: string }> = {
+  sol: { text: 'text-sol', bg: 'bg-sol/15', border: 'border-sol/30' },
+  coral: { text: 'text-coral', bg: 'bg-coral/15', border: 'border-coral/30' },
+  mata: { text: 'text-mata', bg: 'bg-mata/15', border: 'border-mata/30' },
+  neutral: { text: 'text-paper', bg: 'bg-paper/10', border: 'border-paper/20' },
+}
+
+/* Assinatura: traço de pena desenhado à mão sob a palavra */
+function Mark({ children, color = '#5B92E5' }: { children: React.ReactNode; color?: string }) {
+  return (
+    <span className="mark">
+      {children}
+      <svg viewBox="0 0 400 16" preserveAspectRatio="none" aria-hidden="true">
+        <path
+          d="M3 11 C 70 4, 150 3, 210 8 S 330 15, 397 6"
+          fill="none"
+          stroke={color}
+          strokeWidth={5}
+          strokeLinecap="round"
+          pathLength={1}
+        />
+      </svg>
+    </span>
+  )
 }
 
 export default function HomePage() {
@@ -28,106 +150,255 @@ export default function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
       />
-      <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-black px-6 py-16 text-white">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.08),transparent_60%)]"
-        />
 
-        <div className="relative z-10 flex w-full max-w-3xl flex-col items-center text-center">
-          <Image
-            src="/logo_ipi.png"
-            alt="IPI — Instituto de Políticas Internacionais"
-            width={244}
-            height={295}
-            className="w-44 drop-shadow-[0_0_30px_rgba(255,255,255,0.15)] sm:w-52"
-            priority
+      <main>
+        {/* HERO */}
+        <section className="relative overflow-hidden px-6 pt-20 pb-24 sm:pt-28">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -top-32 -right-24 h-[520px] w-[520px] rounded-full opacity-[0.14] blur-3xl"
+            style={{ background: 'radial-gradient(circle, #5B92E5, transparent 70%)' }}
           />
+          <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1.4fr_1fr]">
+            <div>
+              <p className="mb-5 font-display text-xs font-semibold tracking-[0.25em] text-soft uppercase">
+                Instituto de Políticas Internacionais
+              </p>
+              <h1 className="font-display text-[2.7rem] leading-[1.04] font-bold tracking-tight text-paper sm:text-6xl md:text-7xl">
+                A voz da <Mark color="#5B92E5">juventude</Mark>
+                <br />
+                escreve o <Mark color="#86B2F0">futuro</Mark>.
+              </h1>
+              <p className="mt-7 max-w-xl text-lg leading-relaxed text-soft">
+                Formamos jovens líderes críticos para ocupar os espaços de decisão — diplomacia,
+                direitos humanos e protagonismo juvenil, com perspectiva decolonial e compromisso
+                democrático.
+              </p>
+              <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+                <Link
+                  href="/contato"
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-sol px-7 py-3.5 font-semibold text-ink transition-all hover:-translate-y-0.5 hover:brightness-105 focus-visible:ring-2 focus-visible:ring-sol focus-visible:outline-none"
+                >
+                  Faça parte
+                  <span aria-hidden="true">→</span>
+                </Link>
+                <a
+                  href="#sobre"
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-line px-7 py-3.5 font-semibold text-paper transition-colors hover:bg-paper/5"
+                >
+                  Conheça o IPI
+                </a>
+              </div>
+            </div>
 
-          <h1 className="mt-4 text-xs tracking-[0.35em] text-white/60 uppercase">
-            IPI — Instituto de Políticas Internacionais
-          </h1>
-
-          <div className="mt-10 inline-flex items-center gap-3 rounded-full border border-white/15 px-4 py-1.5 text-[10px] font-medium tracking-[0.35em] text-white/70 uppercase">
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white" />
-            Site em construção
+            <div className="hidden justify-center lg:flex">
+              <Image
+                src="/logo_ipi.png"
+                alt="Pena e tinteiro — símbolo do IPI"
+                width={244}
+                height={295}
+                className="w-56 opacity-90 invert"
+                priority
+              />
+            </div>
           </div>
+        </section>
 
-          <p className="mt-6 max-w-xl text-balance text-lg leading-relaxed text-white/85 sm:text-xl">
-            Divulgar a diplomacia e o protagonismo juvenil através de políticas públicas e sociais.
-          </p>
+        {/* SOBRE */}
+        <section id="sobre" className="border-t border-line bg-surface px-6 py-20 sm:py-24">
+          <div className="mx-auto max-w-6xl">
+            <div className="grid gap-12 lg:grid-cols-[1fr_1fr]">
+              <div>
+                <p className="mb-4 font-display text-xs font-semibold tracking-[0.25em] text-sol uppercase">
+                  Quem somos
+                </p>
+                <h2 className="font-display text-3xl leading-tight font-bold tracking-tight text-paper sm:text-4xl">
+                  Educação política, diplomática e cidadã para a juventude.
+                </h2>
+                <p className="mt-6 text-lg leading-relaxed text-soft">
+                  O IPI é uma iniciativa educacional e social comprometida com a formação de jovens
+                  líderes engajados — especialmente de contextos periféricos e sub-representados —
+                  para atuar nos espaços de debate, decisão e transformação social.
+                </p>
+                <p className="mt-4 leading-relaxed text-soft">
+                  Acreditamos que a juventude tem papel central na construção de sociedades mais
+                  justas, democráticas e sustentáveis.
+                </p>
+              </div>
+              <div className="flex flex-col justify-center">
+                <p className="mb-4 font-display text-xs font-semibold tracking-[0.25em] text-soft uppercase">
+                  Nossos valores
+                </p>
+                <div className="flex flex-wrap gap-2.5">
+                  {valores.map((v) => (
+                    <span
+                      key={v}
+                      className="rounded-full border border-line bg-surface-2 px-4 py-2 text-sm font-medium text-paper"
+                    >
+                      {v}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
-          <div className="mt-12 h-px w-24 bg-white/20" />
+        {/* FRENTES / DEPARTAMENTOS */}
+        <section id="frentes" className="border-t border-line px-6 py-20 sm:py-24">
+          <div className="mx-auto max-w-6xl">
+            <div className="mb-12 max-w-2xl">
+              <p className="mb-4 font-display text-xs font-semibold tracking-[0.25em] text-sol uppercase">
+                Nossas frentes
+              </p>
+              <h2 className="font-display text-3xl leading-tight font-bold tracking-tight text-paper sm:text-4xl">
+                Uma estrutura colaborativa, orientada a projetos.
+              </h2>
+            </div>
+            <div className="grid gap-px overflow-hidden rounded-3xl border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
+              {frentes.map((f) => {
+                const a = accent[f.cor]
+                const Icon = f.Icon
+                return (
+                  <div key={f.sigla} className="flex flex-col gap-3 bg-surface p-7">
+                    <div className="flex items-center gap-3.5">
+                      <span
+                        className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border ${a.bg} ${a.border} ${a.text}`}
+                      >
+                        <Icon className="h-5 w-5" strokeWidth={1.75} aria-hidden="true" />
+                      </span>
+                      <div>
+                        <span className="font-display text-[11px] font-semibold tracking-widest text-soft/70">
+                          {f.sigla}
+                        </span>
+                        <h3 className="font-display text-lg leading-tight font-bold text-paper">
+                          {f.nome}
+                        </h3>
+                      </div>
+                    </div>
+                    <p className="text-sm leading-relaxed text-soft">{f.desc}</p>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </section>
 
-          <div className="mt-10 flex items-center gap-5">
-            {socials.map(({ href, label }) => (
-              <a
-                key={label}
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={label}
-                className="flex h-12 w-12 items-center justify-center rounded-full border border-white/20 transition-all duration-300 hover:scale-110 hover:border-white hover:bg-white hover:text-black"
+        {/* PROJETOS */}
+        <section id="projetos" className="border-t border-line bg-surface px-6 py-20 sm:py-24">
+          <div className="mx-auto max-w-6xl">
+            <div className="mb-12 max-w-2xl">
+              <p className="mb-4 font-display text-xs font-semibold tracking-[0.25em] text-sol uppercase">
+                Projetos em andamento
+              </p>
+              <h2 className="font-display text-3xl leading-tight font-bold tracking-tight text-paper sm:text-4xl">
+                Iniciativas que projetam a juventude brasileira.
+              </h2>
+            </div>
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {projetos.map((p, i) => (
+                <article
+                  key={p.nome}
+                  className="group flex flex-col gap-3 rounded-2xl border border-line bg-surface-2 p-6 transition-colors hover:border-sol/40"
+                >
+                  <span className="font-display text-xs font-semibold tracking-widest text-sol/80">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <h3 className="font-display text-base font-bold text-paper">{p.nome}</h3>
+                  <p className="text-sm leading-relaxed text-soft">{p.desc}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* IMPACTO */}
+        <section id="impacto" className="border-t border-line bg-surface-2 px-6 py-20 sm:py-24">
+          <div className="mx-auto max-w-6xl">
+            <div className="mb-12 max-w-2xl">
+              <p className="mb-4 font-display text-xs font-semibold tracking-[0.25em] text-sol uppercase">
+                Impacto social
+              </p>
+              <h2 className="font-display text-3xl leading-tight font-bold tracking-tight text-paper sm:text-4xl">
+                Para que a juventude deixe de ser espectadora e ocupe os centros de decisão.
+              </h2>
+            </div>
+            <ul className="grid gap-x-10 gap-y-5 sm:grid-cols-2">
+              {impacto.map((item) => (
+                <li key={item} className="flex items-start gap-3 border-t border-line pt-5">
+                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-sol" aria-hidden="true" />
+                  <span className="text-lg text-paper/90">{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
+        {/* DOIS CAMINHOS */}
+        <section id="faca-parte" className="border-t border-line px-6 py-20 sm:py-24">
+          <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-2">
+            <div className="flex flex-col rounded-3xl border border-line bg-surface p-8 sm:p-10">
+              <p className="font-display text-xs font-semibold tracking-[0.25em] text-coral uppercase">
+                Para jovens
+              </p>
+              <h3 className="mt-3 font-display text-2xl font-bold text-paper sm:text-3xl">
+                Faça parte do movimento.
+              </h3>
+              <p className="mt-4 flex-1 leading-relaxed text-soft">
+                Voluntarie-se, participe das delegações e ocupe espaços de decisão política, acadêmica
+                e internacional. Não importa de onde você vem.
+              </p>
+              <Link
+                href="/contato"
+                className="mt-7 inline-flex w-fit items-center gap-2 rounded-full bg-coral px-7 py-3.5 font-semibold text-ink transition-all hover:-translate-y-0.5 hover:brightness-105"
               >
-                {label === 'Instagram' && <InstagramIcon />}
-                {label === 'YouTube' && <YouTubeIcon />}
-                {label === 'WhatsApp' && <WhatsAppIcon />}
-              </a>
-            ))}
+                Quero participar <span aria-hidden="true">→</span>
+              </Link>
+            </div>
+            <div className="flex flex-col rounded-3xl border border-line bg-surface-2 p-8 sm:p-10">
+              <p className="font-display text-xs font-semibold tracking-[0.25em] text-sol uppercase">
+                Para instituições
+              </p>
+              <h3 className="mt-3 font-display text-2xl font-bold text-paper sm:text-3xl">
+                Seja parceiro do IPI.
+              </h3>
+              <p className="mt-4 flex-1 leading-relaxed text-soft">
+                Somos um parceiro estratégico para organizações que acreditam no poder transformador
+                da educação e do protagonismo jovem. Vamos construir juntos.
+              </p>
+              <Link
+                href="/contato"
+                className="mt-7 inline-flex w-fit items-center gap-2 rounded-full bg-sol px-7 py-3.5 font-semibold text-ink transition-all hover:-translate-y-0.5 hover:brightness-105"
+              >
+                Propor parceria <span aria-hidden="true">→</span>
+              </Link>
+            </div>
           </div>
+        </section>
 
-          <p className="mt-16 text-xs tracking-widest text-white/40">
-            © {new Date().getFullYear()} IPI · INSTITUTO DE POLÍTICAS INTERNACIONAIS
-          </p>
-        </div>
+        {/* BLOG */}
+        <section className="border-t border-line bg-surface px-6 py-20 sm:py-24">
+          <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 sm:flex-row sm:items-end">
+            <div className="max-w-xl">
+              <p className="mb-4 font-display text-xs font-semibold tracking-[0.25em] text-sol uppercase">
+                Conteúdo & pesquisa
+              </p>
+              <h2 className="font-display text-3xl leading-tight font-bold tracking-tight text-paper sm:text-4xl">
+                Pensamento crítico, em texto.
+              </h2>
+              <p className="mt-4 leading-relaxed text-soft">
+                Análises, projetos e produção acadêmica do NUPPA e dos nossos departamentos.
+              </p>
+            </div>
+            <Link
+              href="/blog"
+              className="inline-flex items-center gap-2 rounded-full border border-line px-7 py-3.5 font-semibold text-paper transition-colors hover:bg-paper/5"
+            >
+              Ler o blog <span aria-hidden="true">→</span>
+            </Link>
+          </div>
+        </section>
       </main>
     </>
-  )
-}
-
-function InstagramIcon() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="h-5 w-5"
-      aria-hidden="true"
-    >
-      <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
-      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-      <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
-    </svg>
-  )
-}
-
-function YouTubeIcon() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="h-5 w-5"
-      aria-hidden="true"
-    >
-      <path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17" />
-      <path d="m10 15 5-3-5-3z" />
-    </svg>
-  )
-}
-
-function WhatsAppIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="h-5 w-5">
-      <path d="M.057 24l1.687-6.163a11.867 11.867 0 0 1-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.82 11.82 0 0 1 8.413 3.488 11.82 11.82 0 0 1 3.48 8.414c-.003 6.554-5.338 11.89-11.893 11.89a11.9 11.9 0 0 1-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 0 1 1.51 5.26l.6.952-1 3.648 3.379-.559zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z" />
-    </svg>
   )
 }
