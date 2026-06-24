@@ -20,39 +20,66 @@ export function PostView({ post, isPreview }: Props) {
       })
     : null
 
+  const articleSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: post.title,
+    description: post.excerpt || undefined,
+    datePublished: post.publishedAt || undefined,
+    dateModified: post.updatedAt || undefined,
+    image: cover?.url ? [cover.url] : undefined,
+    author: {
+      '@type': author?.name ? 'Person' : 'Organization',
+      name: author?.name || 'IPI — Instituto de Políticas Internacionais',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'IPI — Instituto de Políticas Internacionais',
+      logo: { '@type': 'ImageObject', url: 'https://institutoipi.org/logo_ipi.png' },
+    },
+  }
+
   return (
-    <div className="min-h-screen bg-black text-white">
+    <>
+      {!isPreview && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+        />
+      )}
+
       {isPreview && (
-        <div className="sticky top-0 z-50 bg-yellow-400 px-6 py-2 text-center text-xs font-semibold text-black tracking-wider uppercase">
+        <div className="sticky top-0 z-50 bg-sol px-6 py-2 text-center text-xs font-semibold tracking-wider text-ink uppercase">
           Modo Preview — este conteúdo ainda não foi publicado
         </div>
       )}
 
-      <header className="border-b border-white/10">
-        <div className="mx-auto flex max-w-3xl items-center gap-6 px-6 py-5">
-          {!isPreview && (
-            <Link href="/blog" className="text-white/50 transition hover:text-white text-sm">
-              ← Blog
-            </Link>
-          )}
-        </div>
-      </header>
+      <main className="mx-auto max-w-3xl px-6 py-14 sm:py-16">
+        {!isPreview && (
+          <Link
+            href="/blog"
+            className="mb-10 inline-flex items-center gap-1.5 rounded-md text-sm text-soft transition-colors hover:text-paper focus-visible:ring-2 focus-visible:ring-sol focus-visible:outline-none"
+          >
+            <span aria-hidden="true">←</span> Voltar ao blog
+          </Link>
+        )}
 
-      <main className="mx-auto max-w-3xl px-6 py-16">
         {cover?.url && (
-          <div className="mb-10 aspect-video w-full overflow-hidden rounded-xl">
+          <div className="mb-10 aspect-video w-full overflow-hidden rounded-xl border border-line">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={cover.url}
               alt={cover.alt || post.title}
+              width={cover.width ?? undefined}
+              height={cover.height ?? undefined}
               className="h-full w-full object-cover"
             />
           </div>
         )}
 
-        <div className="mb-6 flex flex-wrap items-center gap-3 text-xs text-white/40">
+        <div className="mb-6 flex flex-wrap items-center gap-3 text-xs text-soft">
           {category?.name && (
-            <span className="rounded-full border border-white/15 px-3 py-1 font-medium tracking-wider uppercase text-white/60">
+            <span className="rounded-full border border-line px-3 py-1 font-display font-semibold tracking-wider text-sol uppercase">
               {category.name}
             </span>
           )}
@@ -60,22 +87,22 @@ export function PostView({ post, isPreview }: Props) {
           {author?.name && <span>por {author.name}</span>}
         </div>
 
-        <h1 className="mb-8 text-3xl font-bold leading-tight text-white sm:text-4xl">
+        <h1 className="mb-8 font-display text-3xl leading-tight font-bold tracking-tight text-paper sm:text-4xl">
           {post.title}
         </h1>
 
         {post.excerpt && (
-          <p className="mb-10 text-lg leading-relaxed text-white/60 border-l-2 border-white/20 pl-4">
+          <p className="mb-10 border-l-2 border-sol pl-4 text-lg leading-relaxed text-soft">
             {post.excerpt}
           </p>
         )}
 
         {post.content && (
-          <div className="prose prose-invert prose-lg max-w-none">
+          <div className="prose prose-invert prose-lg max-w-none prose-headings:font-display prose-a:text-sol prose-a:no-underline hover:prose-a:underline">
             <RichText content={post.content} />
           </div>
         )}
       </main>
-    </div>
+    </>
   )
 }
