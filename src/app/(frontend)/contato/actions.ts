@@ -22,6 +22,7 @@ export async function submitContact(
   const email = getString('email')
   const phone = getString('phone')
   const subject = getString('subject')
+  const subjectId = subject ? Number(subject) : undefined
   const message = getString('message')
 
   // subject é exigido no cliente quando há assuntos cadastrados; aqui fica tolerante
@@ -51,7 +52,7 @@ export async function submitContact(
         phone,
         message,
         source: 'pagina-contato',
-        ...(subject ? { subject } : {}),
+        ...(subjectId && Number.isFinite(subjectId) ? { subject: subjectId } : {}),
       },
     })
     return { status: 'success' }
