@@ -4,7 +4,7 @@ export const Leads: CollectionConfig = {
   slug: 'leads',
   admin: {
     useAsTitle: 'name',
-    defaultColumns: ['name', 'email', 'phone', 'source', 'createdAt'],
+    defaultColumns: ['name', 'email', 'phone', 'subject', 'source', 'createdAt'],
     description: 'Contatos recebidos pelo formulário do site.',
   },
   access: {
@@ -17,6 +17,13 @@ export const Leads: CollectionConfig = {
     afterChange: [
       async ({ doc, operation, req }) => {
         if (operation !== 'create') return
+
+        const subjectName = doc.subject
+          ? await req.payload
+              .findByID({ collection: 'subjects', id: doc.subject, depth: 0 })
+              .then((s) => s?.name)
+              .catch(() => null)
+          : null
 
         const notifyTo = process.env.LEAD_NOTIFY_TO
 
@@ -36,6 +43,7 @@ export const Leads: CollectionConfig = {
       <tr><td style="padding:8px 0;font-weight:bold;width:110px;vertical-align:top">Nome</td><td style="padding:8px 0">${doc.name}</td></tr>
       <tr><td style="padding:8px 0;font-weight:bold;vertical-align:top">E-mail</td><td style="padding:8px 0"><a href="mailto:${doc.email}">${doc.email}</a></td></tr>
       ${doc.phone ? `<tr><td style="padding:8px 0;font-weight:bold;vertical-align:top">Telefone</td><td style="padding:8px 0">${doc.phone}</td></tr>` : ''}
+      ${subjectName ? `<tr><td style="padding:8px 0;font-weight:bold;vertical-align:top">Assunto</td><td style="padding:8px 0">${subjectName}</td></tr>` : ''}
       <tr><td style="padding:8px 0;font-weight:bold;vertical-align:top">Mensagem</td><td style="padding:8px 0;white-space:pre-wrap">${doc.message}</td></tr>
     </table>
   </div>
@@ -82,6 +90,7 @@ export const Leads: CollectionConfig = {
     { name: 'name', type: 'text', required: true, label: 'Nome' },
     { name: 'email', type: 'email', required: true, label: 'E-mail' },
     { name: 'phone', type: 'text', label: 'Telefone' },
+    { name: 'subject', type: 'relationship', relationTo: 'subjects', label: 'Assunto' },
     { name: 'message', type: 'textarea', required: true, label: 'Mensagem' },
     {
       name: 'source',
