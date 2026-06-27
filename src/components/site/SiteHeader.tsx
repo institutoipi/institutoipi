@@ -9,7 +9,7 @@ const nav = [
   ['Sobre', '/#sobre'],
   ['Frentes', '/#frentes'],
   ['Projetos', '/#projetos'],
-  ['Blog', '/blog'],
+  ['Nossos textos', '/blog'],
 ] as const
 
 const linkClass =

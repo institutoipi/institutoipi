@@ -394,7 +394,7 @@ export default function HomePage() {
               href="/blog"
               className="inline-flex items-center gap-2 rounded-full border border-line px-7 py-3.5 font-semibold text-paper transition-colors hover:bg-paper/5"
             >
-              Ler o blog <span aria-hidden="true">→</span>
+              Ler nossos textos <span aria-hidden="true">→</span>
             </Link>
           </div>
         </section>

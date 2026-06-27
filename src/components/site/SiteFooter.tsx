@@ -49,7 +49,7 @@ const colInstituto = [
 const colParticipe = [
   ['Faça parte', '/contato'],
   ['Seja parceiro', '/contato'],
-  ['Blog', '/blog'],
+  ['Nossos textos', '/blog'],
 ]
 
 const linkClass =

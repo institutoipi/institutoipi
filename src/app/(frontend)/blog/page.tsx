@@ -5,7 +5,7 @@ import Link from 'next/link'
 import React from 'react'
 
 export const metadata: Metadata = {
-  title: 'Blog',
+  title: 'Nossos textos',
   description: 'Artigos e publicações do Instituto de Políticas Internacionais.',
   alternates: { canonical: '/blog' },
 }
@@ -29,7 +29,7 @@ export default async function BlogPage() {
         <p className="mb-4 font-display text-xs font-semibold tracking-[0.25em] text-sol uppercase">
           Conteúdo &amp; pesquisa
         </p>
-        <h1 className="font-display text-4xl font-bold tracking-tight text-paper sm:text-5xl">Blog</h1>
+        <h1 className="font-display text-4xl font-bold tracking-tight text-paper sm:text-5xl">Nossos textos</h1>
         <p className="mt-4 leading-relaxed text-soft">
           Análises, projetos e produção acadêmica do Instituto de Políticas Internacionais.
         </p>
