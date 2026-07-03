@@ -26,7 +26,7 @@ import { NavFooter as NavFooter_3b9e48c0766d631a740babd8ba41f9aa } from '../../.
 import { AdminIcon as AdminIcon_dfe4008080d895d460898c3a6155e9ba } from '../../../components/admin/Icon'
 import { AdminLogo as AdminLogo_91a09b539d3c86b0aebf520e7564ce08 } from '../../../components/admin/Logo'
 import { PreviewToolbarStyles as PreviewToolbarStyles_71128b4862e9bd71d443778c758afdcb } from '../../../components/admin/PreviewToolbarStyles'
-import { S3ClientUploadHandler as S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24 } from '@payloadcms/storage-s3/client'
+import { UploadthingClientUploadHandler as UploadthingClientUploadHandler_749dcaa11bb61b873d113cb6c609bc10 } from '@payloadcms/storage-uploadthing/client'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 /** @type import('payload').ImportMap */
@@ -59,6 +59,6 @@ export const importMap = {
   "/components/admin/Icon#AdminIcon": AdminIcon_dfe4008080d895d460898c3a6155e9ba,
   "/components/admin/Logo#AdminLogo": AdminLogo_91a09b539d3c86b0aebf520e7564ce08,
   "/components/admin/PreviewToolbarStyles#PreviewToolbarStyles": PreviewToolbarStyles_71128b4862e9bd71d443778c758afdcb,
-  "@payloadcms/storage-s3/client#S3ClientUploadHandler": S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24,
+  "@payloadcms/storage-uploadthing/client#UploadthingClientUploadHandler": UploadthingClientUploadHandler_749dcaa11bb61b873d113cb6c609bc10,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }
