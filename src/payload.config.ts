@@ -13,7 +13,6 @@ import { Media } from './collections/Media'
 import { Posts } from './collections/Posts'
 import { Subjects } from './collections/Subjects'
 import { Users } from './collections/Users'
-import { migrations } from './migrations'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -86,9 +85,10 @@ export default buildConfig({
     // Migrations são a fonte única do schema (dev e prod) — sem drizzle `push`,
     // que diverge das migrations. Mudou o schema? Gere uma migration:
     //   npm run migrate:create   →   npm run migrate
+    // Em produção (Vercel serverless), as migrations rodam no build via
+    // `npm run migrate` (ver vercel.json), não no boot — evita corrida a cada
+    // cold start.
     push: false,
-    // Em produção, roda as migrations pendentes automaticamente no boot.
-    prodMigrations: migrations,
   }),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   sharp: sharp as any,
