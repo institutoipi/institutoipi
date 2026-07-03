@@ -25,11 +25,17 @@ const minioRemotePattern = (() => {
 const nextConfig: NextConfig = {
   images: {
     localPatterns: [
+      { pathname: '/media/**' },
       { pathname: '/api/media/file/**' },
       { pathname: '/*.png' },
       { pathname: '/*.ico' },
     ],
-    remotePatterns: [minioRemotePattern],
+    remotePatterns: [
+      minioRemotePattern,
+      // UploadThing (storage de produção): URLs em <appId>.ufs.sh e utfs.io
+      { protocol: 'https', hostname: '**.ufs.sh', pathname: '/**' },
+      { protocol: 'https', hostname: 'utfs.io', pathname: '/**' },
+    ],
   },
   webpack: (webpackConfig) => {
     webpackConfig.resolve.extensionAlias = {
@@ -42,6 +48,12 @@ const nextConfig: NextConfig = {
   },
   turbopack: {
     root: path.resolve(dirname),
+  },
+  // Mídia atrás do domínio: /media/<arquivo> → rota de arquivos do Payload,
+  // que faz stream do storage (UploadThing em prod). O Cache-Control vem do
+  // `modifyResponseHeaders` da coleção Media (nomes são hash → imutável).
+  async rewrites() {
+    return [{ source: '/media/:filename*', destination: '/api/media/file/:filename*' }]
   },
 }
 

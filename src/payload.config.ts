@@ -2,6 +2,7 @@ import { postgresAdapter } from '@payloadcms/db-postgres'
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { s3Storage } from '@payloadcms/storage-s3'
+import { uploadthingStorage } from '@payloadcms/storage-uploadthing'
 import path from 'path'
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
@@ -93,28 +94,49 @@ export default buildConfig({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   sharp: sharp as any,
   plugins: [
-    // S3 só é ativado quando MINIO_ENDPOINT está configurado
-    ...(process.env.MINIO_ENDPOINT
+    // Storage da coleção `media`:
+    //   - Produção (Vercel): UploadThing quando UPLOADTHING_TOKEN está setado.
+    //   - Dev local: MinIO (S3) quando MINIO_ENDPOINT está setado.
+    //   - Nenhum dos dois: disco local (default do Payload).
+    ...(process.env.UPLOADTHING_TOKEN
       ? [
-          s3Storage({
+          uploadthingStorage({
             collections: {
               media: {
-                generateFileURL: ({ filename: file }) =>
-                  `${minioPublicUrl}/${minioBucket}/${file}`,
+                // Emite a URL no nosso domínio (ex.: /media/<hash>.<ext>) em vez da
+                // CDN do UploadThing. O arquivo é servido pela rota do Payload
+                // (/api/media/file/<arquivo>), para onde o rewrite do next.config
+                // aponta; o Payload faz stream do UploadThing por baixo.
+                generateFileURL: ({ filename }) => `/media/${filename}`,
               },
             },
-            bucket: minioBucket,
-            config: {
-              endpoint: minioEndpointUrl,
-              region: 'us-east-1',
-              credentials: {
-                accessKeyId: process.env.MINIO_ROOT_USER || '',
-                secretAccessKey: process.env.MINIO_ROOT_PASSWORD || '',
-              },
-              forcePathStyle: true,
+            options: {
+              token: process.env.UPLOADTHING_TOKEN,
+              acl: 'public-read',
             },
           }),
         ]
-      : []),
+      : process.env.MINIO_ENDPOINT
+        ? [
+            s3Storage({
+              collections: {
+                media: {
+                  generateFileURL: ({ filename: file }) =>
+                    `${minioPublicUrl}/${minioBucket}/${file}`,
+                },
+              },
+              bucket: minioBucket,
+              config: {
+                endpoint: minioEndpointUrl,
+                region: 'us-east-1',
+                credentials: {
+                  accessKeyId: process.env.MINIO_ROOT_USER || '',
+                  secretAccessKey: process.env.MINIO_ROOT_PASSWORD || '',
+                },
+                forcePathStyle: true,
+              },
+            }),
+          ]
+        : []),
   ],
 })

@@ -36,5 +36,13 @@ export const Media: CollectionConfig = {
       required: true,
     },
   ],
-  upload: true,
+  upload: {
+    // Nome do arquivo é hash do conteúdo → seguro cachear "para sempre".
+    // Vale para a resposta servida pela rota do Payload (/api/media/file/…,
+    // atrás de /media/… via rewrite), que faz stream do storage.
+    modifyResponseHeaders: ({ headers }) => {
+      headers.set('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, immutable')
+      return headers
+    },
+  },
 }
