@@ -1,67 +1,142 @@
-# Payload Blank Template
+# Instituto IPI
 
-This template comes configured with the bare minimum to get started on anything you need.
+Site institucional + CMS do **Instituto de Políticas Internacionais**. É um **monolito
+Next.js 16 + Payload 3.85** — o site público, o painel de administração (`/admin`) e a API
+rodam num app só.
 
-## Quick start
+## Stack
 
-This template can be deployed directly from our Cloud hosting and it will setup MongoDB and cloud S3 object storage for media.
+| Camada | Tecnologia                             | Dev local                 | Produção    |
+|--------|----------------------------------------|---------------------------|-------------|
+| App    | Next.js 16 (App Router) + Payload 3.85 | `npm run dev`             | Vercel      |
+| Banco  | PostgreSQL                             | Docker (`docker-compose`) | Neon        |
+| Mídia  | S3-compatível                          | MinIO (Docker)            | UploadThing |
+| Email  | SMTP                                   | Mailpit (Docker)          | Resend      |
 
-## Quick Start - local setup
+A escolha de storage/email é **automática por variável de ambiente** — não precisa mudar
+código entre dev e prod (ver [Como funciona](#como-funciona)).
 
-To spin up this template locally, follow these steps:
+## Pré-requisitos
 
-### Clone
+- **Node 22** (ver `.nvmrc` → `nvm use`)
+- **npm** (o lockfile é `package-lock.json`)
+- **Docker** + Docker Compose (sobe Postgres/MinIO/Mailpit locais)
 
-After you click the `Deploy` button above, you'll want to have standalone copy of this repo on your machine. If you've already cloned this repo, skip to [Development](#development).
+## Rodar localmente
 
-### Development
+```bash
+cp .env.example .env      # os valores de dev já funcionam, não precisa editar
+docker compose up -d      # Postgres + MinIO + Mailpit
+npm install
+npm run migrate           # cria o schema no Postgres
+npm run dev               # http://localhost:3000
+```
 
-1. First [clone the repo](#clone) if you have not done so already
-2. `cd my-project && cp .env.example .env` to copy the example environment variables. You'll need to add the `MONGODB_URL` from your Cloud project to your `.env` if you want to use S3 storage and the MongoDB database that was created for you.
+Depois abra **http://localhost:3000/admin** e **crie o primeiro usuário admin** (a primeira
+vez o Payload mostra a tela de cadastro).
 
-3. `pnpm install && pnpm dev` to install dependencies and start the dev server
-4. open `http://localhost:3000` to open the app in your browser
+Serviços locais que sobem com o `docker compose`:
 
-That's it! Changes made in `./src` will be reflected in your app. Follow the on-screen instructions to login and create your first admin user. Then check out [Production](#production) once you're ready to build and serve your app, and [Deployment](#deployment) when you're ready to go live.
+| Serviço                   | URL                         | Credenciais                    |
+|---------------------------|-----------------------------|--------------------------------|
+| Site                      | http://localhost:3000       | —                              |
+| Admin                     | http://localhost:3000/admin | criado no 1º acesso            |
+| MinIO (console)           | http://localhost:9001       | `minioadmin` / `minioadmin123` |
+| Mailpit (emails de teste) | http://localhost:8025       | —                              |
 
-#### Docker (Optional)
+## Variáveis de ambiente
 
-If you prefer to use Docker for local development instead of a local MongoDB instance, the provided docker-compose.yml file can be used.
+Copie `.env.example` → `.env`. Em produção, os **mesmos nomes** recebem os valores dos
+serviços gerenciados (setados no painel da Vercel).
 
-To do so, follow these steps:
+| Variável                     | Para quê                         | Dev                     | Produção                            |
+|------------------------------|----------------------------------|-------------------------|-------------------------------------|
+| `PAYLOAD_SECRET`             | Assina tokens/sessões            | qualquer string         | `openssl rand -hex 32`              |
+| `DATABASE_URL`               | Postgres                         | docker-compose          | Neon (connection string **direct**) |
+| `PAYLOAD_PUBLIC_URL`         | URL pública (serverURL/CORS)     | `http://localhost:3000` | `https://institutoipi.org`          |
+| `SITE_URL`                   | Origem pública (CORS/CSRF)       | `http://localhost:3000` | `https://institutoipi.org`          |
+| `UPLOADTHING_TOKEN`          | Storage de mídia (**prod**)      | — (usa MinIO)           | token V7 do UploadThing             |
+| `MINIO_*`                    | Storage de mídia (**dev**)       | docker-compose          | — (usa UploadThing)                 |
+| `EMAIL_SMTP_*`, `EMAIL_FROM` | Envio de email                   | Mailpit                 | Resend                              |
+| `LEAD_NOTIFY_TO`             | Destino das notificações de lead | seu email               | email do instituto                  |
 
-- Modify the `MONGODB_URL` in your `.env` file to `mongodb://127.0.0.1/<dbname>`
-- Modify the `docker-compose.yml` file's `MONGODB_URL` to match the above `<dbname>`
-- Run `docker-compose up` to start the database, optionally pass `-d` to run in the background.
+## Deploy em produção (Vercel + Neon + UploadThing + Resend)
 
-## How it works
+Tudo em free tier, sem cartão. Passo a passo:
 
-The Payload config is tailored specifically to the needs of most websites. It is pre-configured in the following ways:
+1. **Neon** (Postgres) — crie um projeto e copie a connection string (use a **direct**, não
+   a *pooled*, para o `migrate` do build funcionar).
+2. **UploadThing** (mídia) — crie uma app e copie o **token V7** (API Keys). 2GB grátis.
+3. **Resend** (email) — crie a conta, verifique o domínio de envio e gere uma **API key**.
+4. **Vercel** — importe o repo do GitHub e cole as variáveis (Settings → Environment
+   Variables):
 
-### Collections
+   ```
+   PAYLOAD_SECRET=<openssl rand -hex 32>
+   PAYLOAD_PUBLIC_URL=https://institutoipi.org
+   SITE_URL=https://institutoipi.org
+   DATABASE_URL=<Neon direct>
+   UPLOADTHING_TOKEN=<token V7>
+   EMAIL_FROM=contato@institutoipi.org
+   EMAIL_SMTP_HOST=smtp.resend.com
+   EMAIL_SMTP_PORT=465
+   EMAIL_SMTP_SECURE=true
+   EMAIL_SMTP_USER=resend
+   EMAIL_SMTP_PASSWORD=<Resend API key>
+   LEAD_NOTIFY_TO=contato@institutoipi.org
+   ```
 
-See the [Collections](https://payloadcms.com/docs/configuration/collections) docs for details on how to extend this functionality.
+   O `vercel.json` já roda as **migrations no build** (`npm run migrate && npm run build`) —
+   não precisa configurar build command.
+5. Aponte o **DNS** do domínio para a Vercel.
+6. Abra `https://<seu-domínio>/admin` e **crie o primeiro admin**.
 
-- #### Users (Authentication)
+> Trocar de provedor? Só mexer nas envs: sem `UPLOADTHING_TOKEN` mas com `MINIO_ENDPOINT`,
+> o app usa qualquer storage S3-compatível (R2, Supabase, MinIO self-hosted, etc.).
 
-  Users are auth-enabled collections that have access to the admin panel.
+## Migrations
 
-  For additional help, see the official [Auth Example](https://github.com/payloadcms/payload/tree/3.x/examples/auth) or the [Authentication](https://payloadcms.com/docs/authentication/overview#authentication-overview) docs.
+As migrations são a **fonte única do schema** (sem `push` do Drizzle).
 
-- #### Media
+```bash
+npm run migrate:create    # gera uma migration a partir do schema atual
+npm run migrate           # aplica as pendentes
+```
 
-  This is the uploads enabled collection. It features pre-configured sizes, focal point and manual resizing to help you manage your pictures.
+- Em **produção** rodam no build da Vercel (`vercel.json`), não no boot.
+- Use **Node 22** — o loader `tsx` usado pelo `migrate` quebra em Node 26+.
 
-### Docker
+## Como funciona
 
-Alternatively, you can use [Docker](https://www.docker.com) to spin up this template locally. To do so, follow these steps:
+- **Storage de mídia** (`src/payload.config.ts`): `UPLOADTHING_TOKEN` presente → UploadThing;
+  senão `MINIO_ENDPOINT` presente → S3/MinIO; senão disco local.
+- **Mídia atrás do domínio**: em prod a URL é `/media/<hash>.<ext>` no próprio domínio — um
+  rewrite no `next.config.ts` manda `/media/*` para a rota de arquivos do Payload, que faz
+  stream do storage. Nomes são hash do conteúdo → `Cache-Control: immutable`.
+- **Coleções**: `Users` (auth/admin), `Media` (uploads), `Categories`, `Subjects`, `Posts`
+  (com drafts/preview), `Leads` (formulário de contato → email).
 
-1. Follow [steps 1 and 2 from above](#development), the docker-compose file will automatically use the `.env` file in your project root
-1. Next run `docker-compose up`
-1. Follow [steps 4 and 5 from above](#development) to login and create your first admin user
+## Scripts
 
-That's it! The Docker instance will help you get up and running quickly while also standardizing the development environment across your teams.
+| Script                               | Faz                           |
+|--------------------------------------|-------------------------------|
+| `npm run dev`                        | Dev server (HMR)              |
+| `npm run build`                      | Build de produção             |
+| `npm start`                          | Sobe o build                  |
+| `npm run migrate` / `migrate:create` | Aplica / gera migrations      |
+| `npm run generate:types`             | Regenera `payload-types.ts`   |
+| `npm run generate:importmap`         | Regenera o importMap do admin |
+| `npm run lint`                       | ESLint                        |
+| `npm test`                           | Testes (Vitest + Playwright)  |
 
-## Questions
+## Estrutura
 
-If you have any issues or questions, reach out to us on [Discord](https://discord.com/invite/payload) or start a [GitHub discussion](https://github.com/payloadcms/payload/discussions).
+```
+src/
+  app/(frontend)/   → site público
+  app/(payload)/    → admin + API do Payload
+  collections/      → Users, Media, Categories, Subjects, Posts, Leads
+  migrations/       → schema (fonte da verdade)
+  components/, lib/ → UI e helpers do site
+  payload.config.ts → configuração central
+```

@@ -1,24 +1,6 @@
+# Sobe só a infra local (Postgres + MinIO + Mailpit). O app roda no host com
+# `npm run dev` (ver README) — mais rápido pra desenvolver e depurar.
 services:
-  institutoipi.payload:
-    container_name: institutoipi.payload
-    image: node:20-alpine
-    ports:
-      - '3000:3000'
-    volumes:
-      - .:/home/node/app
-      - ipi_node_modules:/home/node/app/node_modules
-    working_dir: /home/node/app/
-    command: sh -c "corepack enable && corepack prepare pnpm@latest --activate && pnpm install && pnpm dev"
-    depends_on:
-      institutoipi.postgres:
-        condition: service_healthy
-      institutoipi.minio:
-          condition: service_healthy
-      institutoipi.mailpit:
-        condition: service_healthy
-    env_file:
-      - .env
-
   institutoipi.postgres:
     container_name: institutoipi.postgres
     restart: always
@@ -96,5 +78,4 @@ services:
 
 volumes:
   ipi_pgdata:
-  ipi_node_modules:
   ipi_minio_data:
