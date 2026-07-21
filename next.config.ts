@@ -31,12 +31,7 @@ const nextConfig: NextConfig = {
       { pathname: '/*.png' },
       { pathname: '/*.ico' },
     ],
-    remotePatterns: [
-      minioRemotePattern,
-      // UploadThing (storage de produção): URLs em <appId>.ufs.sh e utfs.io
-      { protocol: 'https', hostname: '**.ufs.sh', pathname: '/**' },
-      { protocol: 'https', hostname: 'utfs.io', pathname: '/**' },
-    ],
+    remotePatterns: [minioRemotePattern],
   },
   webpack: (webpackConfig) => {
     webpackConfig.resolve.extensionAlias = {
