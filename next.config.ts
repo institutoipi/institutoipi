@@ -23,6 +23,7 @@ const minioRemotePattern = (() => {
 })()
 
 const nextConfig: NextConfig = {
+  output: 'standalone',
   images: {
     localPatterns: [
       { pathname: '/media/**' },

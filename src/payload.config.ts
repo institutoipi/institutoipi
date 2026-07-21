@@ -14,6 +14,7 @@ import { Media } from './collections/Media'
 import { Posts } from './collections/Posts'
 import { Subjects } from './collections/Subjects'
 import { Users } from './collections/Users'
+import { migrations } from './migrations'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -26,7 +27,6 @@ const siteOrigins = [
 
 const minioProtocol = process.env.MINIO_USE_SSL === 'true' ? 'https' : 'http'
 const minioEndpointUrl = `${minioProtocol}://${process.env.MINIO_ENDPOINT}:${process.env.MINIO_PORT}`
-const minioPublicUrl = process.env.MINIO_PUBLIC_URL || minioEndpointUrl
 const minioBucket = process.env.MINIO_BUCKET || 'institutoipi-media'
 
 export default buildConfig({
@@ -86,18 +86,18 @@ export default buildConfig({
     // Migrations são a fonte única do schema (dev e prod) — sem drizzle `push`,
     // que diverge das migrations. Mudou o schema? Gere uma migration:
     //   npm run migrate:create   →   npm run migrate
-    // Em produção (Vercel serverless), as migrations rodam no build via
-    // `npm run migrate` (ver vercel.json), não no boot — evita corrida a cada
-    // cold start.
     push: false,
+    // Self-hosted (1 container): roda as migrations pendentes no boot.
+    prodMigrations: migrations,
   }),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   sharp: sharp as any,
   plugins: [
     // Storage da coleção `media`:
-    //   - Produção (Vercel): UploadThing quando UPLOADTHING_TOKEN está setado.
-    //   - Dev local: MinIO (S3) quando MINIO_ENDPOINT está setado.
+    //   - UploadThing quando UPLOADTHING_TOKEN está setado.
+    //   - MinIO (S3) quando MINIO_ENDPOINT está setado (prod self-hosted + dev).
     //   - Nenhum dos dois: disco local (default do Payload).
+    // Em ambos os casos a URL é /media/<arquivo>, servida pela rota do Payload.
     ...(process.env.UPLOADTHING_TOKEN
       ? [
           uploadthingStorage({
@@ -121,8 +121,9 @@ export default buildConfig({
             s3Storage({
               collections: {
                 media: {
-                  generateFileURL: ({ filename: file }) =>
-                    `${minioPublicUrl}/${minioBucket}/${file}`,
+                  // Mídia atrás do domínio; o MinIO é acessado só pelo servidor
+                  // (stream via rota do Payload), o bucket pode ser privado.
+                  generateFileURL: ({ filename: file }) => `/media/${file}`,
                 },
               },
               bucket: minioBucket,

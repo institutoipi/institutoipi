@@ -1,0 +1,6 @@
+# TLS automático (Let's Encrypt) para o domínio em APP_DOMAIN.
+# Precisa das portas 80 (desafio ACME) e 443 publicadas — ver docker-compose.prod.yml.
+{$APP_DOMAIN} {
+	encode gzip zstd
+	reverse_proxy app:3000
+}

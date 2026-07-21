@@ -1,0 +1,111 @@
+# =============================================================
+# Instituto IPI — produção self-hosted (servidor dedicado)
+#
+# O servidor É o repo git clonado em /opt/institutoipi (com .env local, gitignored).
+# A imagem do app é buildada NO PRÓPRIO SERVIDOR (sem registry).
+#
+# Deploy:  cd /opt/institutoipi && git pull &&
+#          docker compose -f docker-compose.prod.yml up -d --build
+#
+# .env fornece: PAYLOAD_SECRET, PAYLOAD_PUBLIC_URL, SITE_URL, APP_DOMAIN,
+# POSTGRES_*, MINIO_ROOT_USER/PASSWORD, MINIO_BUCKET, EMAIL_*, LEAD_NOTIFY_TO.
+# NÃO setar UPLOADTHING_TOKEN → usa o MinIO local.
+# =============================================================
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    container_name: ipi-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN}
+    depends_on:
+      - app
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: institutoipi-app:latest
+    container_name: ipi-app
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      HOSTNAME: 0.0.0.0
+      PORT: "3000"
+      # Rede interna do compose (sobrescreve o que estiver no .env):
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      MINIO_ENDPOINT: minio
+      MINIO_PORT: "9000"
+      MINIO_USE_SSL: "false"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: ipi-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ipi_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  minio:
+    image: minio/minio
+    container_name: ipi-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - ipi_minio:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  # Cria o bucket (privado — a mídia é servida pela rota do Payload, não direto do MinIO)
+  minio-init:
+    image: minio/mc
+    container_name: ipi-minio-init
+    restart: "no"
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_BUCKET: ${MINIO_BUCKET}
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 $$MINIO_ROOT_USER $$MINIO_ROOT_PASSWORD &&
+      mc mb --ignore-existing local/$$MINIO_BUCKET &&
+      echo 'MinIO pronto (bucket privado)'
+      "
+
+volumes:
+  ipi_pgdata:
+  ipi_minio:
+  caddy_data:
+  caddy_config:
