@@ -10,6 +10,7 @@ type LexicalNode = {
   tag?: string
   listType?: string
   fields?: { url?: string; newTab?: boolean }
+  value?: { url?: string; alt?: string; mimeType?: string; filename?: string }
   [k: string]: unknown
 }
 
@@ -61,6 +62,20 @@ function LexicalNode({ node }: { node: LexicalNode }): React.ReactElement | null
     if (format & 4) text = <s>{text}</s>
     if (format & 16) text = <code>{text}</code>
     return <>{text}</>
+  }
+  if (node.type === 'upload') {
+    const doc = node.value
+    if (!doc?.url) return null
+    // Não-imagem (PDF etc.) vira link; imagem vira <img>.
+    if (typeof doc.mimeType === 'string' && !doc.mimeType.startsWith('image')) {
+      return (
+        <a href={doc.url} rel="noopener noreferrer">
+          {doc.filename ?? 'arquivo'}
+        </a>
+      )
+    }
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={doc.url} alt={doc.alt || ''} loading="lazy" />
   }
   if (node.type === 'linebreak') return <br />
   if (node.children) return <LexicalNodes nodes={node.children} />

@@ -33,12 +33,11 @@ export const Posts: CollectionConfig = {
       const base = process.env.PAYLOAD_PUBLIC_URL || 'http://localhost:3000'
       return `${base}/blog/${doc.slug}`
     },
-    // Iframe de live preview ao lado do editor
+    // Iframe de live preview ao lado do editor. URL RELATIVA (resolve contra a
+    // origem do admin — localhost em dev, domínio em prod) e por ID (sempre
+    // existe; o slug pode ser nulo num rascunho recém-criado sem título).
     livePreview: {
-      url: ({ data, req }) => {
-        const base = req.payload.config.serverURL || 'http://localhost:3000'
-        return `${base}/blog/preview/${data.slug}`
-      },
+      url: ({ data }) => `/blog/preview/${data.id}`,
     },
   },
   access: {
@@ -153,8 +152,12 @@ export const Posts: CollectionConfig = {
   ],
   hooks: {
     beforeValidate: [
-      ({ data, operation }) => {
-        if (operation === 'create' && data?.title && !data.slug) {
+      ({ data }) => {
+        // Gera o slug sempre que estiver vazio e houver título (qualquer operação).
+        // Com drafts/autosave o post nasce sem título (slug vazio); ao digitar o
+        // título, o próximo autosave preenche o slug — garantindo que todo post
+        // publicado tenha slug (a URL pública usa o slug).
+        if (data && !data.slug && data.title) {
           data.slug = slugify(data.title as string)
         }
         return data
