@@ -40,10 +40,10 @@ const socials = [
 ]
 
 const colInstituto = [
-  ['Sobre', '/#sobre'],
-  ['Frentes', '/#frentes'],
-  ['Projetos', '/#projetos'],
-  ['Impacto', '/#impacto'],
+  ['Sobre', '/sobre'],
+  ['Frentes', '/frentes'],
+  ['Projetos', '/projetos'],
+  ['Contato', '/contato'],
 ]
 
 const colParticipe = [

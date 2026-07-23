@@ -7,10 +7,11 @@ import React, { useEffect, useState } from 'react'
 import { Menu, X } from 'lucide-react'
 
 const nav = [
-  ['Sobre', '/#sobre'],
-  ['Frentes', '/#frentes'],
-  ['Projetos', '/#projetos'],
+  ['Sobre', '/sobre'],
+  ['Frentes', '/frentes'],
+  ['Projetos', '/projetos'],
   ['Nossos textos', '/blog'],
+  ['Contato', '/contato'],
 ] as const
 
 const linkClass =
