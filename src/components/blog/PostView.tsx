@@ -37,6 +37,10 @@ export function PostView({ post, isPreview }: Props) {
       name: 'IPI — Instituto de Políticas Internacionais',
       logo: { '@type': 'ImageObject', url: 'https://institutoipi.org/logo_ipi.png' },
     },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `https://institutoipi.org/blog/${post.slug}`,
+    },
   }
 
   return (
@@ -72,6 +76,8 @@ export function PostView({ post, isPreview }: Props) {
               alt={cover.alt || post.title}
               width={cover.width ?? undefined}
               height={cover.height ?? undefined}
+              fetchPriority="high"
+              loading="eager"
               className="h-full w-full object-cover"
             />
           </div>

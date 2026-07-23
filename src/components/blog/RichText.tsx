@@ -10,7 +10,14 @@ type LexicalNode = {
   tag?: string
   listType?: string
   fields?: { url?: string; newTab?: boolean }
-  value?: { url?: string; alt?: string; mimeType?: string; filename?: string }
+  value?: {
+    url?: string
+    alt?: string
+    mimeType?: string
+    filename?: string
+    width?: number
+    height?: number
+  }
   [k: string]: unknown
 }
 
@@ -74,8 +81,17 @@ function LexicalNode({ node }: { node: LexicalNode }): React.ReactElement | null
         </a>
       )
     }
-    // eslint-disable-next-line @next/next/no-img-element
-    return <img src={doc.url} alt={doc.alt || ''} loading="lazy" />
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={doc.url}
+        alt={doc.alt || ''}
+        width={doc.width ?? undefined}
+        height={doc.height ?? undefined}
+        loading="lazy"
+        decoding="async"
+      />
+    )
   }
   if (node.type === 'linebreak') return <br />
   if (node.children) return <LexicalNodes nodes={node.children} />

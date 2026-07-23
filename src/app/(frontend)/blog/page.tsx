@@ -1,8 +1,7 @@
-import configPromise from '@payload-config'
-import { getPayload } from 'payload'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import React from 'react'
+import { getPublishedPosts } from '@/lib/posts'
 
 export const metadata: Metadata = {
   title: 'Nossos textos',
@@ -10,18 +9,11 @@ export const metadata: Metadata = {
   alternates: { canonical: '/blog' },
 }
 
+// Dinâmica (build do Docker não tem DB), mas a query é cacheada — ver src/lib/posts.ts.
 export const dynamic = 'force-dynamic'
 
 export default async function BlogPage() {
-  const payload = await getPayload({ config: configPromise })
-
-  const { docs: posts } = await payload.find({
-    collection: 'posts',
-    where: { _status: { equals: 'published' } },
-    sort: '-publishedAt',
-    depth: 2,
-    limit: 50,
-  })
+  const posts = await getPublishedPosts()
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-16 sm:py-20">
@@ -36,7 +28,19 @@ export default async function BlogPage() {
       </div>
 
       {posts.length === 0 ? (
-        <p className="text-soft">Nenhum post publicado ainda.</p>
+        <div className="rounded-2xl border border-line bg-surface px-8 py-16 text-center">
+          <p className="font-display text-xl font-bold text-paper">Em breve, nossos primeiros textos</p>
+          <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-soft">
+            Estamos preparando análises, projetos e produção acadêmica. Enquanto isso, acompanhe o
+            Instituto pelas redes ou fale com a gente.
+          </p>
+          <Link
+            href="/contato"
+            className="mt-6 inline-flex rounded-full bg-sol px-6 py-3 text-sm font-semibold text-ink transition-all hover:brightness-105"
+          >
+            Fale conosco
+          </Link>
+        </div>
       ) : (
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
             {posts.map((post) => {
@@ -64,6 +68,10 @@ export default async function BlogPage() {
                       <img
                         src={cover.url}
                         alt={cover.alt || post.title}
+                        width={cover.width ?? undefined}
+                        height={cover.height ?? undefined}
+                        loading="lazy"
+                        decoding="async"
                         className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
                       />
                     ) : (

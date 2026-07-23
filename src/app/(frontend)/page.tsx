@@ -268,7 +268,7 @@ export default function HomePage() {
                         <Icon className="h-5 w-5" strokeWidth={1.75} aria-hidden="true" />
                       </span>
                       <div>
-                        <span className="font-display text-[11px] font-semibold tracking-widest text-soft/70">
+                        <span className="font-display text-[11px] font-semibold tracking-widest text-soft">
                           {f.sigla}
                         </span>
                         <h3 className="font-display text-lg leading-tight font-bold text-paper">

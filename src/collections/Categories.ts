@@ -1,22 +1,20 @@
 import type { CollectionConfig } from 'payload'
-import { slugify } from '../lib/slugify'
+import { uniqueSlug } from '../lib/uniqueSlug'
+import { adminOrEditor } from '../lib/access'
 import { revalidateBlog } from '../lib/revalidate'
-
-function isAdminOrEditor(user: { role?: string } | null): boolean {
-  return user?.role === 'admin' || user?.role === 'editor'
-}
 
 export const Categories: CollectionConfig = {
   slug: 'categories',
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'slug'],
+    group: 'Conteúdo',
   },
   access: {
     read: () => true,
-    create: ({ req: { user } }) => isAdminOrEditor(user as { role?: string } | null),
-    update: ({ req: { user } }) => isAdminOrEditor(user as { role?: string } | null),
-    delete: ({ req: { user } }) => isAdminOrEditor(user as { role?: string } | null),
+    create: adminOrEditor,
+    update: adminOrEditor,
+    delete: adminOrEditor,
   },
   fields: [
     {
@@ -41,9 +39,9 @@ export const Categories: CollectionConfig = {
   ],
   hooks: {
     beforeValidate: [
-      ({ data, operation }) => {
+      async ({ data, req, operation }) => {
         if (operation === 'create' && data?.name && !data.slug) {
-          data.slug = slugify(data.name)
+          data.slug = await uniqueSlug(req.payload, 'categories', data.name)
         }
         return data
       },

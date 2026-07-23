@@ -1,16 +1,8 @@
 import type { CollectionConfig, Where } from 'payload'
-import { slugify } from '../lib/slugify'
+import type { User } from '@/payload-types'
+import { uniqueSlug } from '../lib/uniqueSlug'
+import { isAdminOrEditor, ownNonPublished } from '../lib/access'
 import { revalidateBlog } from '../lib/revalidate'
-
-type UserWithRole = { id: number; role?: string } | null
-
-function isAdminOrEditor(user: UserWithRole): boolean {
-  return user?.role === 'admin' || user?.role === 'editor'
-}
-
-function ownNonPublished(userId: number): Where {
-  return { and: [{ author: { equals: userId } }, { _status: { not_equals: 'published' } }] }
-}
 
 export const Posts: CollectionConfig = {
   slug: 'posts',
@@ -25,6 +17,7 @@ export const Posts: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'status', 'category', 'publishedAt'],
+    group: 'Conteúdo',
     // Botão "Preview" — abre o post publicado em nova aba. Só faz sentido quando
     // publicado (a página pública dá 404 em rascunho); retornar null esconde o botão.
     // Para rascunhos use o "Open in new window" do live preview (/blog/preview/...).
@@ -47,16 +40,16 @@ export const Posts: CollectionConfig = {
     },
     create: ({ req: { user } }) => Boolean(user),
     update: ({ req: { user } }) => {
-      if (!user) return false
-      const u = user as UserWithRole
+      const u = user as User | null
+      if (!u) return false
       if (isAdminOrEditor(u)) return true
-      return ownNonPublished(u!.id)
+      return ownNonPublished(u.id)
     },
     delete: ({ req: { user } }) => {
-      if (!user) return false
-      const u = user as UserWithRole
+      const u = user as User | null
+      if (!u) return false
       if (isAdminOrEditor(u)) return true
-      return ownNonPublished(u!.id)
+      return ownNonPublished(u.id)
     },
   },
   fields: [
@@ -87,23 +80,32 @@ export const Posts: CollectionConfig = {
     {
       name: 'excerpt',
       type: 'textarea',
+      maxLength: 200,
       admin: {
-        description: 'Resumo exibido na listagem (160–200 chars).',
+        description: 'Resumo exibido na listagem (160–200 caracteres).',
       },
     },
     {
       name: 'content',
       type: 'richText',
+      admin: {
+        description: 'Corpo do texto. Imagens inline aparecem no site e no preview.',
+      },
     },
     {
       name: 'cover',
       type: 'upload',
       relationTo: 'media',
+      admin: {
+        position: 'sidebar',
+        description: 'Capa em 16:9. Aparece na listagem e no topo do post.',
+      },
     },
     {
       name: 'category',
       type: 'relationship',
       relationTo: 'categories',
+      admin: { position: 'sidebar' },
     },
     {
       name: 'author',
@@ -118,6 +120,11 @@ export const Posts: CollectionConfig = {
       type: 'select',
       required: true,
       defaultValue: 'draft',
+      admin: {
+        position: 'sidebar',
+        description:
+          'Use "Em revisão" para enviar ao editor. A publicação efetiva é feita pelo botão "Publicar".',
+      },
       // enumName próprio para não colidir com o `_status` nativo dos drafts
       // (ambos derivariam `enum_posts_status` e o `review` seria perdido).
       enumName: 'enum_posts_editorial_status',
@@ -131,6 +138,7 @@ export const Posts: CollectionConfig = {
       name: 'publishedAt',
       type: 'date',
       admin: {
+        position: 'sidebar',
         date: { pickerAppearance: 'dayAndTime' },
         description: 'Preenchido automaticamente ao publicar.',
       },
@@ -145,27 +153,27 @@ export const Posts: CollectionConfig = {
     {
       name: 'seoDescription',
       type: 'textarea',
+      maxLength: 160,
       admin: {
-        description: 'Meta description (até 160 chars).',
+        description: 'Meta description (até 160 caracteres).',
       },
     },
   ],
   hooks: {
     beforeValidate: [
-      ({ data }) => {
-        // Gera o slug sempre que estiver vazio e houver título (qualquer operação).
-        // Com drafts/autosave o post nasce sem título (slug vazio); ao digitar o
-        // título, o próximo autosave preenche o slug — garantindo que todo post
-        // publicado tenha slug (a URL pública usa o slug).
+      async ({ data, req }) => {
+        // Gera o slug ÚNICO sempre que estiver vazio e houver título (qualquer op).
+        // Com drafts/autosave o post nasce sem título; ao digitar, o próximo autosave
+        // preenche o slug. `uniqueSlug` evita colisão de títulos iguais.
         if (data && !data.slug && data.title) {
-          data.slug = slugify(data.title as string)
+          data.slug = await uniqueSlug(req.payload, 'posts', data.title as string)
         }
         return data
       },
     ],
     beforeChange: [
       ({ data, req, operation }) => {
-        const user = req.user as UserWithRole
+        const user = req.user as User | null
 
         if (operation === 'create' && user && !data.author) {
           data.author = user.id

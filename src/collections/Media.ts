@@ -1,20 +1,19 @@
 import type { CollectionConfig } from 'payload'
 import crypto from 'crypto'
 import path from 'path'
+import { authenticated, adminOrEditor } from '../lib/access'
 
 export const Media: CollectionConfig = {
   slug: 'media',
   admin: {
     useAsTitle: 'alt',
+    group: 'Conteúdo',
   },
   access: {
     read: () => true,
-    create: ({ req: { user } }) => Boolean(user),
-    update: ({ req: { user } }) => Boolean(user),
-    delete: ({ req: { user } }) => {
-      const role = (user as { role?: string } | null)?.role
-      return role === 'admin' || role === 'editor'
-    },
+    create: authenticated,
+    update: authenticated,
+    delete: adminOrEditor,
   },
   hooks: {
     // Armazena o arquivo com um hash do conteúdo em vez do nome original
@@ -34,9 +33,14 @@ export const Media: CollectionConfig = {
       name: 'alt',
       type: 'text',
       required: true,
+      admin: {
+        description: 'Descreva a imagem para leitores de tela e SEO (não use o nome do arquivo).',
+      },
     },
   ],
   upload: {
+    // Só imagens — evita upload de arquivos arbitrários (PDF, etc.).
+    mimeTypes: ['image/*'],
     // Nome do arquivo é hash do conteúdo → seguro cachear "para sempre".
     // Vale para a resposta servida pela rota do Payload (/api/media/file/…,
     // atrás de /media/… via rewrite), que faz stream do storage.

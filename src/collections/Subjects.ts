@@ -1,8 +1,5 @@
 import type { CollectionConfig } from 'payload'
-
-function isAdminOrEditor(user: { role?: string } | null): boolean {
-  return user?.role === 'admin' || user?.role === 'editor'
-}
+import { adminOrEditor } from '../lib/access'
 
 export const Subjects: CollectionConfig = {
   slug: 'subjects',
@@ -14,12 +11,13 @@ export const Subjects: CollectionConfig = {
     useAsTitle: 'name',
     defaultColumns: ['name', 'order', 'active'],
     description: 'Assuntos exibidos no select do formulário de contato.',
+    group: 'Site',
   },
   access: {
     read: () => true,
-    create: ({ req: { user } }) => isAdminOrEditor(user as { role?: string } | null),
-    update: ({ req: { user } }) => isAdminOrEditor(user as { role?: string } | null),
-    delete: ({ req: { user } }) => isAdminOrEditor(user as { role?: string } | null),
+    create: adminOrEditor,
+    update: adminOrEditor,
+    delete: adminOrEditor,
   },
   defaultSort: 'order',
   fields: [

@@ -2,7 +2,8 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import React, { useState } from 'react'
+import { usePathname } from 'next/navigation'
+import React, { useEffect, useState } from 'react'
 import { Menu, X } from 'lucide-react'
 
 const nav = [
@@ -17,6 +18,17 @@ const linkClass =
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false)
+  const pathname = usePathname()
+
+  // Fecha o menu mobile com Escape.
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [open])
 
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-ink/80 backdrop-blur-md">
@@ -32,9 +44,13 @@ export function SiteHeader() {
         <ul className="hidden items-center gap-1 md:flex">
           {nav.map(([label, href]) => (
             <li key={label}>
-              <a href={href} className={linkClass}>
+              <Link
+                href={href}
+                className={linkClass}
+                aria-current={pathname === href ? 'page' : undefined}
+              >
                 {label}
-              </a>
+              </Link>
             </li>
           ))}
         </ul>
@@ -64,13 +80,14 @@ export function SiteHeader() {
           <ul className="flex flex-col">
             {nav.map(([label, href]) => (
               <li key={label}>
-                <a
+                <Link
                   href={href}
                   onClick={() => setOpen(false)}
+                  aria-current={pathname === href ? 'page' : undefined}
                   className="block rounded-lg px-2 py-3 text-base font-medium text-soft transition-colors hover:bg-paper/5 hover:text-paper focus-visible:ring-2 focus-visible:ring-sol focus-visible:outline-none"
                 >
                   {label}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>

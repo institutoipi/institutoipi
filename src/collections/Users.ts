@@ -1,5 +1,5 @@
 import type { CollectionConfig } from 'payload'
-import { slugify } from '../lib/slugify'
+import { uniqueSlug } from '../lib/uniqueSlug'
 import { adminOnly, adminOrSelf, adminFieldOnly } from '../lib/access'
 
 export const Users: CollectionConfig = {
@@ -26,7 +26,7 @@ export const Users: CollectionConfig = {
           if (totalDocs === 0) data.role = 'admin'
 
           if (!data.slug && data.name) {
-            data.slug = slugify(data.name as string)
+            data.slug = await uniqueSlug(req.payload, 'users', data.name as string)
           }
         }
         return data

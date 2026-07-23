@@ -91,9 +91,9 @@ export function SiteFooter() {
             <ul className="space-y-3">
               {colInstituto.map(([label, href]) => (
                 <li key={label}>
-                  <a href={href} className={linkClass}>
+                  <Link href={href} className={linkClass}>
                     {label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
