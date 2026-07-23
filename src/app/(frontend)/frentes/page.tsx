@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Breadcrumbs } from '@/components/site/Breadcrumbs'
+import { PageHeader } from '@/components/site/PageHeader'
 import { frentes, accent } from '@/lib/institucional'
 
 const description =
@@ -18,18 +19,11 @@ export default function FrentesPage() {
     <>
       <Breadcrumbs items={[{ name: 'Início', path: '/' }, { name: 'Frentes' }]} />
       <main className="mx-auto max-w-6xl px-6 py-16 sm:py-20">
-        <div className="mb-12 max-w-2xl">
-          <p className="mb-4 font-display text-xs font-semibold tracking-[0.25em] text-sol uppercase">
-            Nossas frentes
-          </p>
-          <h1 className="font-display text-3xl leading-tight font-bold tracking-tight text-paper sm:text-5xl">
-            Uma estrutura colaborativa, orientada a projetos.
-          </h1>
-          <p className="mt-4 text-lg leading-relaxed text-soft">
-            O trabalho do IPI se organiza em departamentos temáticos que colaboram entre si — cada um
-            com sua área de atuação, todos voltados ao protagonismo da juventude.
-          </p>
-        </div>
+        <PageHeader
+          eyebrow="Nossas frentes"
+          title="Uma estrutura colaborativa, orientada a projetos."
+          intro="O trabalho do IPI se organiza em departamentos temáticos que colaboram entre si — cada um com sua área de atuação, todos voltados ao protagonismo da juventude."
+        />
 
         <div className="grid gap-px overflow-hidden rounded-3xl border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
           {frentes.map((f) => {

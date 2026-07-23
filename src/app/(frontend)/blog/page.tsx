@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import React from 'react'
 import { getPublishedPosts } from '@/lib/posts'
+import { PageHeader } from '@/components/site/PageHeader'
 
 export const metadata: Metadata = {
   title: 'Nossos textos',
@@ -17,15 +18,11 @@ export default async function BlogPage() {
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-16 sm:py-20">
-      <div className="mb-12 max-w-2xl">
-        <p className="mb-4 font-display text-xs font-semibold tracking-[0.25em] text-sol uppercase">
-          Conteúdo &amp; pesquisa
-        </p>
-        <h1 className="font-display text-4xl font-bold tracking-tight text-paper sm:text-5xl">Nossos textos</h1>
-        <p className="mt-4 leading-relaxed text-soft">
-          Análises, projetos e produção acadêmica do Instituto de Políticas Internacionais.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Conteúdo & pesquisa"
+        title="Nossos textos"
+        intro="Análises, projetos e produção acadêmica do Instituto de Políticas Internacionais."
+      />
 
       {posts.length === 0 ? (
         <div className="rounded-2xl border border-line bg-surface px-8 py-16 text-center">

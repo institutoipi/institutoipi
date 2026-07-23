@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Breadcrumbs } from '@/components/site/Breadcrumbs'
+import { PageHeader } from '@/components/site/PageHeader'
 import { projetos } from '@/lib/institucional'
 
 const description =
@@ -18,18 +19,11 @@ export default function ProjetosPage() {
     <>
       <Breadcrumbs items={[{ name: 'Início', path: '/' }, { name: 'Projetos' }]} />
       <main className="mx-auto max-w-6xl px-6 py-16 sm:py-20">
-        <div className="mb-12 max-w-2xl">
-          <p className="mb-4 font-display text-xs font-semibold tracking-[0.25em] text-sol uppercase">
-            Projetos em andamento
-          </p>
-          <h1 className="font-display text-3xl leading-tight font-bold tracking-tight text-paper sm:text-5xl">
-            Iniciativas que projetam a juventude brasileira.
-          </h1>
-          <p className="mt-4 text-lg leading-relaxed text-soft">
-            Da diplomacia à justiça climática, nossos projetos abrem caminhos concretos para jovens
-            ocuparem espaços de decisão no Brasil e no mundo.
-          </p>
-        </div>
+        <PageHeader
+          eyebrow="Projetos em andamento"
+          title="Iniciativas que projetam a juventude brasileira."
+          intro="Da diplomacia à justiça climática, nossos projetos abrem caminhos concretos para jovens ocuparem espaços de decisão no Brasil e no mundo."
+        />
 
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {projetos.map((p, i) => (

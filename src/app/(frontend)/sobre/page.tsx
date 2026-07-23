@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Breadcrumbs } from '@/components/site/Breadcrumbs'
+import { PageHeader } from '@/components/site/PageHeader'
 import { valores, impacto } from '@/lib/institucional'
 
 const description =
@@ -17,15 +18,13 @@ export default function SobrePage() {
   return (
     <>
       <Breadcrumbs items={[{ name: 'Início', path: '/' }, { name: 'Sobre' }]} />
-      <main className="mx-auto max-w-4xl px-6 py-16 sm:py-20">
-        <p className="mb-4 font-display text-xs font-semibold tracking-[0.25em] text-sol uppercase">
-          Quem somos
-        </p>
-        <h1 className="font-display text-3xl leading-tight font-bold tracking-tight text-paper sm:text-5xl">
-          Educação política, diplomática e cidadã para a juventude.
-        </h1>
+      <main className="mx-auto max-w-6xl px-6 py-16 sm:py-20">
+        <PageHeader
+          eyebrow="Quem somos"
+          title="Educação política, diplomática e cidadã para a juventude."
+        />
 
-        <div className="mt-8 space-y-5 text-lg leading-relaxed text-soft">
+        <div className="max-w-3xl space-y-5 text-lg leading-relaxed text-soft">
           <p>
             O IPI é uma iniciativa educacional e social comprometida com a formação de jovens
             líderes engajados — especialmente de contextos periféricos e sub-representados — para
@@ -64,7 +63,7 @@ export default function SobrePage() {
           <h2 className="font-display text-2xl font-bold tracking-tight text-paper sm:text-3xl">
             Nosso impacto
           </h2>
-          <p className="mt-3 leading-relaxed text-soft">
+          <p className="mt-3 max-w-3xl leading-relaxed text-soft">
             Para que a juventude deixe de ser espectadora e ocupe os centros de decisão.
           </p>
           <ul className="mt-8 grid gap-x-10 gap-y-5 sm:grid-cols-2">

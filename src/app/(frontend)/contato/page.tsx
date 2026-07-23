@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import React from 'react'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
+import { Breadcrumbs } from '@/components/site/Breadcrumbs'
+import { PageHeader } from '@/components/site/PageHeader'
 import { ContactForm } from './ContactForm'
 
 export const metadata: Metadata = {
@@ -30,20 +32,18 @@ export default async function ContatoPage() {
   }
 
   return (
-    <main className="mx-auto max-w-2xl px-6 py-16 sm:py-20">
-      <div className="mb-10">
-        <p className="mb-4 font-display text-xs font-semibold tracking-[0.25em] text-sol uppercase">
-          Contato
-        </p>
-        <h1 className="font-display text-4xl font-bold tracking-tight text-paper sm:text-5xl">
-          Fale conosco
-        </h1>
-        <p className="mt-4 leading-relaxed text-soft">
-          Preencha o formulário e entraremos em contato em breve — ou fale por uma das nossas redes.
-        </p>
-      </div>
-
-      <ContactForm subjects={subjects} />
-    </main>
+    <>
+      <Breadcrumbs items={[{ name: 'Início', path: '/' }, { name: 'Contato' }]} />
+      <main className="mx-auto max-w-6xl px-6 py-16 sm:py-20">
+        <PageHeader
+          eyebrow="Contato"
+          title="Fale conosco"
+          intro="Preencha o formulário e entraremos em contato em breve — ou fale por uma das nossas redes."
+        />
+        <div className="max-w-xl">
+          <ContactForm subjects={subjects} />
+        </div>
+      </main>
+    </>
   )
 }
