@@ -12,6 +12,12 @@
 # NÃO setar UPLOADTHING_TOKEN → usa o MinIO local.
 # =============================================================
 
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   caddy:
     image: caddy:2-alpine
@@ -27,7 +33,10 @@ services:
     environment:
       APP_DOMAIN: ${APP_DOMAIN}
     depends_on:
-      - app
+      app:
+        condition: service_healthy
+    mem_limit: 128m
+    logging: *default-logging
 
   app:
     build:
@@ -51,6 +60,15 @@ services:
         condition: service_healthy
       minio:
         condition: service_healthy
+    # /health inicializa o Payload (dispara prodMigrations no 1º boot) e checa o DB.
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    mem_limit: 2g
+    logging: *default-logging
 
   postgres:
     image: postgres:17-alpine
@@ -67,6 +85,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+    mem_limit: 512m
+    logging: *default-logging
 
   minio:
     image: minio/minio
@@ -84,6 +104,8 @@ services:
       timeout: 5s
       retries: 10
       start_period: 10s
+    mem_limit: 512m
+    logging: *default-logging
 
   # Cria o bucket (privado — a mídia é servida pela rota do Payload, não direto do MinIO)
   minio-init:
@@ -103,6 +125,7 @@ services:
       mc mb --ignore-existing local/$$MINIO_BUCKET &&
       echo 'MinIO pronto (bucket privado)'
       "
+    logging: *default-logging
 
 volumes:
   ipi_pgdata:

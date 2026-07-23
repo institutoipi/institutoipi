@@ -10,7 +10,21 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Gate: lint + typecheck antes de tocar produção. O build real é no servidor.
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx tsc --noEmit
+      # (o `npm run lint` está quebrado — config circular do ESLint 9; reabilitar quando corrigido)
+
   deploy:
+    needs: ci
     runs-on: ubuntu-latest
     steps:
       # O build acontece NO SERVIDOR (docker compose --build). O CI só dispara
@@ -25,6 +39,12 @@ jobs:
           script: |
             set -e
             cd /opt/institutoipi
+            BEFORE=$(git rev-parse HEAD)
             git pull --ff-only origin main
             docker compose -f docker-compose.prod.yml up -d --build
+            # Caddy usa bind-mount do Caddyfile (compose não detecta mudança de conteúdo):
+            # reinicia só quando o Caddyfile mudou neste deploy.
+            if git diff --name-only "$BEFORE" HEAD | grep -q '^Caddyfile$'; then
+              docker compose -f docker-compose.prod.yml restart caddy
+            fi
             docker image prune -f

@@ -162,6 +162,9 @@ export interface User {
  */
 export interface Media {
   id: number;
+  /**
+   * Descreva a imagem para leitores de tela e SEO (não use o nome do arquivo).
+   */
   alt: string;
   updatedAt: string;
   createdAt: string;
@@ -199,9 +202,12 @@ export interface Post {
   title: string;
   slug: string;
   /**
-   * Resumo exibido na listagem (160–200 chars).
+   * Resumo exibido na listagem (160–200 caracteres).
    */
   excerpt?: string | null;
+  /**
+   * Corpo do texto. Imagens inline aparecem no site e no preview.
+   */
   content?: {
     root: {
       type: string;
@@ -217,12 +223,18 @@ export interface Post {
     };
     [k: string]: unknown;
   } | null;
+  /**
+   * Capa em 16:9. Aparece na listagem e no topo do post.
+   */
   cover?: (number | null) | Media;
   category?: (number | null) | Category;
   /**
    * Preenchido automaticamente. Editável só por administradores.
    */
   author?: (number | null) | User;
+  /**
+   * Use "Em revisão" para enviar ao editor. A publicação efetiva é feita pelo botão "Publicar".
+   */
   status: 'draft' | 'review' | 'published';
   /**
    * Preenchido automaticamente ao publicar.
@@ -233,7 +245,7 @@ export interface Post {
    */
   seoTitle?: string | null;
   /**
-   * Meta description (até 160 chars).
+   * Meta description (até 160 caracteres).
    */
   seoDescription?: string | null;
   updatedAt: string;
