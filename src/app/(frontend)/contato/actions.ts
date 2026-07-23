@@ -2,6 +2,8 @@
 
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
+import { headers } from 'next/headers'
+import { rateLimit } from '@/lib/rateLimit'
 
 export type ContactState =
   | { status: 'idle' }
@@ -18,12 +20,26 @@ export async function submitContact(
     const v = formData.get(key)
     return typeof v === 'string' ? v.trim() : ''
   }
+
+  // Honeypot: bots preenchem o campo oculto. Descarta silenciosamente (retorna
+  // "sucesso" para não sinalizar ao bot que foi detectado).
+  if (getString('website')) return { status: 'success' }
+
+  // Rate limit por IP: no máx. 5 envios / 10 min. Caddy repassa X-Forwarded-For.
+  const hdrs = await headers()
+  const ip = (hdrs.get('x-forwarded-for') ?? '').split(',')[0]?.trim() || 'desconhecido'
+  if (!rateLimit(`contact:${ip}`, 5, 10 * 60_000)) {
+    return { status: 'error', message: 'Muitas tentativas. Aguarde alguns minutos e tente de novo.' }
+  }
+
   const name = getString('name')
   const email = getString('email')
   const phone = getString('phone')
   const subject = getString('subject')
   const subjectId = subject ? Number(subject) : undefined
   const message = getString('message')
+  // Origem granular (CTAs passam um valor específico); default seguro.
+  const source = getString('source') || 'pagina-contato'
 
   // subject é exigido no cliente quando há assuntos cadastrados; aqui fica tolerante
   // para não travar o formulário caso ainda não exista nenhum assunto no admin.
@@ -46,12 +62,14 @@ export async function submitContact(
     const payload = await getPayload({ config: configPromise })
     await payload.create({
       collection: 'leads',
+      // Local API com overrideAccess (o REST público está fechado em Leads.access).
+      overrideAccess: true,
       data: {
         name,
         email,
         phone,
         message,
-        source: 'pagina-contato',
+        source,
         ...(subjectId && Number.isFinite(subjectId) ? { subject: subjectId } : {}),
       },
     })

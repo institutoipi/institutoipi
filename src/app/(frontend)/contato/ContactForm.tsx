@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useState } from 'react'
+import { useActionState, useEffect, useRef, useState } from 'react'
 import { submitContact, type ContactState } from './actions'
 
 const initial: ContactState = { status: 'idle' }
@@ -16,7 +16,7 @@ function formatPhone(value: string): string {
 }
 
 const fieldClass =
-  'rounded-lg border border-line bg-surface-2 px-4 py-3 text-sm text-paper placeholder:text-soft/50 focus:border-sol focus:ring-2 focus:ring-sol/30 focus:outline-none'
+  'rounded-lg border border-line bg-surface-2 px-4 py-3 text-sm text-paper placeholder:text-soft/70 focus:border-sol focus:ring-2 focus:ring-sol/30 focus:outline-none'
 const labelClass = 'text-xs font-medium tracking-wider uppercase text-soft'
 
 type Subject = { id: string; name: string }
@@ -24,11 +24,23 @@ type Subject = { id: string; name: string }
 export function ContactForm({ subjects = [] }: { subjects?: Subject[] }) {
   const [state, action, pending] = useActionState(submitContact, initial)
   const [phone, setPhone] = useState('')
+  const successRef = useRef<HTMLParagraphElement>(null)
+
+  // Move o foco para a confirmação (leitores de tela anunciam; teclado segue dali).
+  useEffect(() => {
+    if (state.status === 'success') successRef.current?.focus()
+  }, [state.status])
 
   if (state.status === 'success') {
     return (
       <div className="rounded-2xl border border-line bg-surface p-8 text-center">
-        <p className="font-display text-lg font-bold text-paper">Mensagem enviada!</p>
+        <p
+          ref={successRef}
+          tabIndex={-1}
+          className="font-display text-lg font-bold text-paper outline-none"
+        >
+          Mensagem enviada!
+        </p>
         <p className="mt-2 text-sm text-soft">
           Enviamos uma confirmação para o seu e-mail. Entraremos em contato em breve.
         </p>
@@ -38,8 +50,21 @@ export function ContactForm({ subjects = [] }: { subjects?: Subject[] }) {
 
   return (
     <form action={action} className="flex flex-col gap-5">
+      {/* Honeypot anti-spam: invisível a humanos e leitores de tela; bots preenchem. */}
+      <input
+        type="text"
+        name="website"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, opacity: 0 }}
+      />
+
       {state.status === 'error' && (
-        <p className="rounded-lg border border-coral/40 bg-coral/10 px-4 py-3 text-sm text-coral">
+        <p
+          role="alert"
+          className="rounded-lg border border-coral/40 bg-coral/10 px-4 py-3 text-sm text-coral"
+        >
           {state.message}
         </p>
       )}

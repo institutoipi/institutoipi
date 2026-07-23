@@ -2,5 +2,14 @@
 # Precisa das portas 80 (desafio ACME) e 443 publicadas — ver docker-compose.prod.yml.
 {$APP_DOMAIN} {
 	encode gzip zstd
+	# Headers de segurança. (Sem CSP rígida: o admin do Payload usa inline scripts.
+	# X-Frame-Options SAMEORIGIN preserva o iframe do live preview, mesma origem.)
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "SAMEORIGIN"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
 	reverse_proxy app:3000
 }

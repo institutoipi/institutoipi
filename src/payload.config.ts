@@ -21,7 +21,8 @@ const dirname = path.dirname(filename)
 const siteOrigins = [
   process.env.PAYLOAD_PUBLIC_URL,
   process.env.SITE_URL || 'https://institutoipi.org',
-  'http://localhost:3000',
+  // localhost só em dev — não faz sentido no CORS/CSRF de produção.
+  ...(process.env.NODE_ENV !== 'production' ? ['http://localhost:3000'] : []),
 ].filter(Boolean) as string[]
 
 const minioProtocol = process.env.MINIO_USE_SSL === 'true' ? 'https' : 'http'

@@ -1,5 +1,6 @@
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
+import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { LivePreviewClient } from './LivePreviewClient'
 
@@ -12,8 +13,13 @@ export default async function PostPreviewPage({ params }: Props) {
   const { id } = await params
   const payload = await getPayload({ config: configPromise })
 
+  // Só usuários autenticados veem rascunhos. O iframe do live preview roda na
+  // mesma origem do admin e envia o cookie de sessão, então continua funcionando.
+  // Sem isso, qualquer anônimo poderia enumerar /blog/preview/<id> e ler drafts.
+  const { user } = await payload.auth({ headers: await headers() })
+  if (!user) notFound()
+
   // Busca por ID incluindo rascunhos (o slug pode ser nulo num rascunho novo).
-  // overrideAccess pois a rota é interna do admin.
   const post = await payload
     .findByID({ collection: 'posts', id, depth: 2, draft: true, overrideAccess: true })
     .catch(() => null)

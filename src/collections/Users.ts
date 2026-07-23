@@ -1,13 +1,23 @@
 import type { CollectionConfig } from 'payload'
 import { slugify } from '../lib/slugify'
+import { adminOnly, adminOrSelf, adminFieldOnly } from '../lib/access'
 
 export const Users: CollectionConfig = {
   slug: 'users',
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'email', 'role'],
+    group: 'Equipe',
   },
   auth: true,
+  access: {
+    // Admin gerencia todos; usuário comum lê/edita só a si mesmo. Criar/deletar
+    // usuário é só de admin (o cadastro do 1º admin é exceção do próprio Payload).
+    read: adminOrSelf,
+    create: adminOnly,
+    update: adminOrSelf,
+    delete: adminOnly,
+  },
   hooks: {
     beforeChange: [
       async ({ data, req, operation }) => {
@@ -42,7 +52,7 @@ export const Users: CollectionConfig = {
         { label: 'Autor', value: 'author' },
       ],
       access: {
-        update: ({ req: { user } }) => (user as { role?: string } | null)?.role === 'admin',
+        update: adminFieldOnly,
       },
     },
     {
